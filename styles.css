@@ -21,6 +21,43 @@ body {
     overflow-x: hidden;
 }
 
+/* Терминалы связи (Telegram) */
+.network-links {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap; /* Чтобы на мобилках не слипались */
+}
+
+.tg-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: rgba(36, 129, 204, 0.1); /* Полупрозрачный синий ТГ */
+    color: #38bdf8;
+    border: 1px solid #0284c7;
+    padding: 10px 20px;
+    border-radius: 20px; /* Круглые края как у тегов */
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(2, 132, 199, 0.2);
+}
+
+/* Анимация при наведении */
+.tg-btn:hover {
+    background-color: #0284c7;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(2, 132, 199, 0.6);
+    transform: translateY(-3px);
+}
+
+.tg-btn .icon {
+    font-size: 16px;
+}
+
 /* Хедер в виде шапки соцсети */
 header {
     background-color: #161b22;
