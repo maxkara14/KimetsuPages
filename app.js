@@ -11,7 +11,7 @@ function renderToggles() {
                 <div class="avatar toggle">T</div>
                 <div class="post-meta">
                     <span class="post-author">${item.title}</span>
-                    <span class="post-time">Касугай-Система • Промпт</span>
+                    <span class="post-time">Regex • Промпт</span>
                 </div>
             </div>
             <div class="post-body">
@@ -89,7 +89,7 @@ function renderUtilities() {
                 <div class="avatar utility">U</div>
                 <div class="post-meta">
                     <span class="post-author">${item.title}</span>
-                    <span class="post-time">Модификации • Пакет</span>
+                    <span class="post-time">Утилиты • Расширения</span>
                 </div>
             </div>
             <div class="post-body">
