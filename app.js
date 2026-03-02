@@ -1,30 +1,29 @@
-// Функция отрисовки промптов
-function renderToggles() {
-    const container = document.getElementById('toggles-container');
+// Отрисовка расширений
+function renderExtensions() {
+    const container = document.getElementById('extensions-container');
     container.innerHTML = ''; 
     
-    siteData.toggles.forEach((item, index) => {
+    siteData.extensions.forEach((item) => {
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
             <div class="post-header">
-                <div class="avatar toggle">P</div>
+                <div class="avatar utility">E</div>
                 <div class="post-meta">
                     <span class="post-author">${item.title}</span>
-                    <span class="post-time">Regex • Промпт</span>
+                    <span class="post-time">SillyTavern Extension</span>
                 </div>
             </div>
             <div class="post-body">
                 <p>${item.description}</p>
-                <button onclick="copyPrompt(this, ${index})" class="btn copy-btn">📋 Копировать Промпт</button>
-                <a href="${item.regexFile}" download class="btn download-btn">💾 Скачать Regex</a>
+                <a href="${item.url}" target="_blank" class="btn download-btn">🔗 ${item.btnText}</a>
             </div>
         `;
         container.appendChild(card);
     });
 }
 
-// Функция отрисовки ботов
+// Отрисовка ботов
 function renderBots() {
     const container = document.getElementById('bots-container');
     container.innerHTML = '';
@@ -49,63 +48,23 @@ function renderBots() {
     });
 }
 
-// Утилита для копирования
-function copyPrompt(buttonElement, index) {
-    // Достаем текст напрямую из базы данных по индексу
-    const textToCopy = siteData.toggles[index].promptText;
-
-    navigator.clipboard.writeText(textToCopy).then(() => {
-        const originalText = buttonElement.innerText;
-        buttonElement.innerText = "Скопировано!";
-        buttonElement.classList.add('success');
-        
-        setTimeout(() => {
-            buttonElement.innerText = originalText;
-            buttonElement.classList.remove('success');
-        }, 2000);
-    }).catch(err => {
-        console.error('Ошибка: ', err);
-        alert('Браузер заблокировал буфер обмена.');
-    });
-}
-
-// Функция отрисовки утилит (Добавь ее к остальным функциям)
-function renderUtilities() {
-    const container = document.getElementById('utilities-container');
-    if (!container) return; 
+// Отрисовка Галереи
+function renderGallery() {
+    const container = document.getElementById('gallery-container');
     container.innerHTML = '';
     
-    siteData.utilities.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        
-        let buttonsHtml = '';
-        item.downloads.forEach(dl => {
-            buttonsHtml += `<a href="${dl.url}" download class="btn download-btn">${dl.name}</a>`;
-        });
-
-        card.innerHTML = `
-            <div class="post-header">
-                <div class="avatar utility">U</div>
-                <div class="post-meta">
-                    <span class="post-author">${item.title}</span>
-                    <span class="post-time">Утилиты • Расширения</span>
-                </div>
-            </div>
-            <div class="post-body">
-                <p>${item.description}</p>
-                <div class="utilities-downloads" style="margin-top: 15px;">
-                    ${buttonsHtml}
-                </div>
-            </div>
-        `;
-        container.appendChild(card);
+    siteData.gallery.forEach(img => {
+        const item = document.createElement('div');
+        item.className = 'gallery-item';
+        // Если картинка не загрузится (например, ты еще не создал файл), покажется заглушка
+        item.innerHTML = `<img src="${img.src}" alt="${img.title}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMzZjJjMmMiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZmlsbD0iI2Q0YWYzNyIgZm9udC1zaXplPSIxOHB4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+QXJ0IEhlcmU8L3RleHQ+PC9zdmc+'" loading="lazy">`;
+        container.appendChild(item);
     });
 }
 
 // Запуск
 document.addEventListener('DOMContentLoaded', () => {
-    renderToggles();
+    renderExtensions();
     renderBots();
-    renderUtilities();
+    renderGallery();
 });
