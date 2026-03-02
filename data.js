@@ -4,7 +4,7 @@ const siteData = {
             title: "🛠️ BB UI Regex Manager",
             description: "Центр управления регексами для SillyTavern. Планшет (SimsOS), радио, красивые переходы и набор фильтров для очистки сообщений от мусора.",
             url: "https://github.com/maxkara14/BB-UI-Regex-Pack", // Сюда потом вставишь ссылку на свой гитхаб
-            btnText: "Скачать с GitHub"
+            btnText: "Установить с GitHub"
         }
     ],
     bots: [
