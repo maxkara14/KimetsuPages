@@ -8,7 +8,7 @@ const siteData = {
         },
         {
             title: "✨ BB Enhance Generation",
-            description: "Панель кнопок для генерации и редактуры текста для SillyTavern.",
+            description: "Панель кнопок для генерации и редактуры текста для SillyTavern. Режиссёр случайных событий.",
             url: "https://github.com/maxkara14/BB-Enhance-Gen",
             btnText: "Установить с GitHub"
         }        
