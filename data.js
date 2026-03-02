@@ -3,9 +3,15 @@ const siteData = {
         {
             title: "🛠️ BB UI Regex Manager",
             description: "Центр управления регексами для SillyTavern. Планшет (SimsOS), радио, красивые переходы и набор фильтров для очистки сообщений от мусора.",
-            url: "https://github.com/maxkara14/BB-UI-Regex-Pack", // Сюда потом вставишь ссылку на свой гитхаб
+            url: "https://github.com/maxkara14/BB-UI-Regex-Pack",
             btnText: "Установить с GitHub"
-        }
+        },
+        {
+            title: "✨ BB Enhance Generation",
+            description: "Панель кнопок для генерации и редактуры текста для SillyTavern.",
+            url: "https://github.com/maxkara14/BB-Enhance-Gen",
+            btnText: "Установить с GitHub"
+        }        
     ],
     bots: [
         {
