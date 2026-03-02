@@ -3,51 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Бруник | SillyTavern</title>
+    <title>Бруник | Data Hub</title>
     <link rel="icon" type="image/png" href="img/ui/favicon.png">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
         <h1>[BruniikBron // Data Hub]</h1>
-        <p>Архив промптов, регексов и персонажей для SillyTavern</p>
+        <p>Fan-Site • Mods • Characters • Art</p>
     </header>
 
     <main>
-
         <section class="network-links">
-
             <a href="https://t.me/Brun11kBr0n" target="_blank" class="tg-btn">
-
                 <span class="icon">➣</span> Telegram Channel
-
             </a>
-
             <a href="https://t.me/+rOyDlht2nJI2OTVi" target="_blank" class="tg-btn chat">
-
                 <span class="icon">➣</span> Telegram Chat
-
             </a>
+        </section>
 
+        <section id="radio-section" style="margin-bottom: 40px;">
+            <div class="l-podcast-body">
+                <div class="l-top-section">
+                    <div class="l-avatar">
+                        <div class="l-avatar-image"></div>
+                    </div>
+                    <div class="l-speech-bubble">
+                        Йоу! Добро пожаловать в Data Hub. Врубай музло на фоне, чекай расширения и арты внизу! 🔥
+                    </div>
+                </div>
+                <div class="l-player">
+                    <div class="l-track-info">
+                        <div class="l-now-playing-row">
+                            <span class="l-now-playing">LIVE BROADCAST</span>
+                            <span class="l-freq">FM 104.5 // STEREO</span>
+                        </div>
+                        <div class="l-marquee">
+                            <span>♪ 104.5 LYCORIS FM • 24/7 PARADISE MIX ♪ 104.5 LYCORIS FM • 24/7 PARADISE MIX ♪</span>
+                        </div>
+                        <div class="l-audio-container">
+                            <audio class="l-audio-player" controls preload="none" src="https://stream.radioparadise.com/aac-128"></audio>
+                        </div>
+                    </div>
+                    <div class="l-eq-box">
+                        <div class="l-eq">
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
         
-    <main>
-        <section id="toggles-section">
-            <h2>> Regex и Промпты</h2>
-            <div class="grid-container" id="toggles-container">
-                </div>
-        </section>
-        
-        <section id="utilities-section">
-            <h2>> Утилиты и Расширения</h2>
-            <div class="grid-container" id="utilities-container">
-                </div>
+        <section id="extensions-section">
+            <h2>> Расширения</h2>
+            <div class="grid-container" id="extensions-container"></div>
         </section>
 
         <section id="bots-section">
             <h2>> Персонажи</h2>
-            <div class="grid-container" id="bots-container">
-                </div>
+            <div class="grid-container" id="bots-container"></div>
+        </section>
+
+        <section id="gallery-section">
+            <h2>> Галерея</h2>
+            <div class="gallery-grid" id="gallery-container"></div>
         </section>
     </main>
 
