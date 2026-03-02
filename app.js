@@ -11,7 +11,7 @@ function renderExtensions() {
                 <div class="avatar utility">E</div>
                 <div class="post-meta">
                     <span class="post-author">${item.title}</span>
-                    <span class="post-time">SillyTavern Mod</span>
+                    <span class="post-time">SillyTavern Extension</span>
                 </div>
             </div>
             <div class="post-body">
