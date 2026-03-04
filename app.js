@@ -69,9 +69,55 @@ function renderGallery() {
     });
 }
 
+// 🔧 Обновленный движок для спойлеров (с гидравликой!)
+function setupToggles() {
+    const sections = [
+        { id: 'extensions-section', contentId: 'extensions-container', collapseDefault: false },
+        { id: 'bots-section', contentId: 'bots-container', collapseDefault: false },
+        { id: 'gallery-section', contentId: 'gallery-container', collapseDefault: true } 
+    ];
+
+    sections.forEach(sec => {
+        const sectionEl = document.getElementById(sec.id);
+        if (!sectionEl) return;
+
+        const header = sectionEl.querySelector('h2'); 
+        const content = document.getElementById(sec.contentId); 
+
+        if (!header || !content) return;
+
+        header.classList.add('toggle-header');
+
+        // Собираем детали для гидравлической обертки
+        const wrapper = document.createElement('div');
+        wrapper.className = 'toggle-wrapper';
+        
+        const inner = document.createElement('div');
+        inner.className = 'toggle-inner';
+
+        // Аккуратно переносим твой контент внутрь новых блоков (без изменения HTML вручную!)
+        content.parentNode.insertBefore(wrapper, content);
+        wrapper.appendChild(inner);
+        inner.appendChild(content);
+
+        // Настраиваем стартовое положение (глушим галерею по умолчанию)
+        if (sec.collapseDefault) {
+            header.classList.add('collapsed');
+            wrapper.classList.add('collapsed');
+        }
+
+        // Подключаем зажигание (реакция на клик)
+        header.addEventListener('click', () => {
+            header.classList.toggle('collapsed');
+            wrapper.classList.toggle('collapsed');
+        });
+    });
+}
+
 // Запуск
 document.addEventListener('DOMContentLoaded', () => {
-    renderExtensions();
-    renderBots();
-    renderGallery();
+    renderExtensions(); //
+    renderBots();       //
+    renderGallery();    //
+    setupToggles();     // <-- Врубаем наши тоглы!
 });
