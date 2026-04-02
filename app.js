@@ -113,8 +113,8 @@ function initModalEvents() {
 // 🔧 Движок для спойлеров (с гидравликой)
 function setupToggles() {
     const sections = [
-        { id: 'extensions-section', contentId: 'extensions-container', collapseDefault: false },
-        { id: 'bots-section', contentId: 'bots-container', collapseDefault: false },
+        { id: 'extensions-section', contentId: 'extensions-container', collapseDefault: true },
+        { id: 'bots-section', contentId: 'bots-container', collapseDefault: true },
         { id: 'gallery-section', contentId: 'gallery-container', collapseDefault: true } 
     ];
 
