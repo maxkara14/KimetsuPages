@@ -58,13 +58,55 @@ function renderGallery() {
     siteData.gallery.forEach(img => {
         const item = document.createElement('div');
         item.className = 'gallery-item';
+        item.title = img.title;
         
         item.innerHTML = `
-            <a href="${img.src}" target="_blank" rel="noopener noreferrer" title="Открыть оригинал: ${img.title}">
-                <img src="${img.src}" alt="${img.title}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMzZjJjMmMiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZmlsbD0iI2Q0YWYzNyIgZm9udC1zaXplPSIxOHB4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+QXJ0IEhlcmU8L3RleHQ+PC9zdmc+'" loading="lazy">
-            </a>
+            <img src="${img.src}" alt="${img.title}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMzZjJjMmMiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZmlsbD0iI2Q0YWYzNyIgZm9udC1zaXplPSIxOHB4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+QXJ0IEhlcmU8L3RleHQ+PC9zdmc+'" loading="lazy">
         `;
+
+        item.addEventListener('click', () => {
+            openGalleryModal(img.src, img.title);
+        });
+
         container.appendChild(item);
+    });
+}
+
+// === ЛОГИКА МОДАЛЬНОГО ОКНА ===
+function openGalleryModal(src, title) {
+    const modal = document.getElementById('gallery-modal');
+    const modalImg = document.getElementById('modal-img');
+    const captionText = document.getElementById('modal-caption');
+
+    if (!modal || !modalImg || !captionText) return;
+
+    modal.classList.add('active');
+    modalImg.src = src;
+    captionText.innerText = title;
+
+    // Закрытие при клике на оверлей (но не на картинку)
+    modal.onclick = function(e) {
+        if (e.target === modal) {
+            closeGalleryModal();
+        }
+    };
+}
+
+function closeGalleryModal() {
+    const modal = document.getElementById('gallery-modal');
+    if (modal) modal.classList.remove('active');
+}
+
+// Инициализация кнопок закрытия модалки
+function initModalEvents() {
+    const closeBtn = document.querySelector('.modal-close');
+    if (closeBtn) {
+        closeBtn.onclick = closeGalleryModal;
+    }
+
+    // Закрытие на ESC
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeGalleryModal();
     });
 }
 
@@ -1123,4 +1165,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initFireflyMinigame();  
     initCanvasNotes(); 
     initAsyaCat();
+    initModalEvents();
 });
