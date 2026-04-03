@@ -167,7 +167,7 @@ function setupToggles() {
             const topAfter = header.getBoundingClientRect().top;
             const diff = topAfter - topBefore;
             if (Math.abs(diff) > 1) {
-                window.scrollBy({ top: diff, behavior: 'auto' });
+                window.scrollBy({ top: -diff, behavior: 'auto' });
             }
         };
 
@@ -213,9 +213,11 @@ function setupToggles() {
 
         header.addEventListener('click', () => {
             if (sec.instantToggle) {
+                const topBefore = header.getBoundingClientRect().top;
                 const collapsed = wrapper.classList.toggle('collapsed');
                 header.classList.toggle('collapsed', collapsed);
                 wrapper.style.height = collapsed ? '0px' : 'auto';
+                requestAnimationFrame(() => stabilizeViewport(topBefore));
                 return;
             }
 
@@ -244,7 +246,7 @@ function initCustomPlayer() {
     if (snitchCheckbox) {
         snitchCheckbox.onclick = (e) => {
             e.preventDefault();
-            if (!snitchCheckbox.checked) showLoFiToast("🔒 Сфокусируйся и жди...", "#dcb97a");
+            showLoFiToast("🔒 Сфокусируйся и жди...", "#dcb97a");
             return false;
         };
     }
