@@ -39,7 +39,7 @@ const siteData = {
     ],
     bots: [
         {
-            title: "Kimetsu Academy",
+            title: "Kimetsu Academy 🖊️",
             description: "Альтернативная вселенная Kimetsu no Yaiba в жанре школьной комедии и повседневности. Хашира стали строгими учителями, а истребители — обычными школьниками. Содержит огромное количество канонных персонажей и проработанных авторских OC для ваших сюжетов.",
             botFile: "files/bots/Kimetsu Academy.json"
         }
