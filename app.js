@@ -618,10 +618,12 @@ function spawnSnitch() {
     `;
     
     let lastJumpTime = 0;
+    const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+    const escapeRadius = isCoarsePointer ? 95 : 80;
 
     function move() {
         const now = Date.now();
-        if (now - lastJumpTime < 500) return;
+        if (now - lastJumpTime < (isCoarsePointer ? 350 : 500)) return;
 
         const rect = snitch.getBoundingClientRect();
         const curX = rect.left;
@@ -662,13 +664,14 @@ function spawnSnitch() {
         const sY = rect.top + rect.height / 2;
         const dist = Math.hypot(clientX - sX, clientY - sY);
         
-        if (dist < 80) move();
+        if (dist < escapeRadius) move();
     };
 
     window.addEventListener('mousemove', escapeLogic);
     window.addEventListener('touchstart', escapeLogic, { passive: true });
+    window.addEventListener('touchmove', escapeLogic, { passive: true });
 
-    snitch.onclick = () => {
+    const catchSnitch = () => {
         const cb = document.getElementById('quest-cb-snitch');
         if (cb) {
             cb.checked = true;
@@ -678,8 +681,14 @@ function spawnSnitch() {
         showLoFiToast("🏆 СНИТЧ ПОЙМАН!", "#d4af37");
         window.removeEventListener('mousemove', escapeLogic);
         window.removeEventListener('touchstart', escapeLogic);
+        window.removeEventListener('touchmove', escapeLogic);
+        snitch.removeEventListener('click', catchSnitch);
+        snitch.removeEventListener('touchend', catchSnitch);
         snitch.remove();
     };
+
+    snitch.addEventListener('click', catchSnitch);
+    snitch.addEventListener('touchend', catchSnitch, { passive: true });
 }
 // === ДВИЖОК DRAG & DROP (С СЕНСОРНЫМ ПРИВОДОМ) ===
 function initDraggableWidgets() {
@@ -1664,6 +1673,7 @@ function initBalanceMinigame() {
 
     if (!checkbox || !overlay || !area || !pen || !zone) return;
 
+    const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
     const startQuotes = [
         "Попробуй удержать ручку в зоне...",
         "Смотри не урони, криворучка.",
@@ -1822,12 +1832,29 @@ function initBalanceMinigame() {
         }
     }
 
+    const syncPointer = (clientX) => {
+        const r = area.getBoundingClientRect();
+        mX = Math.max(0, Math.min(100, ((clientX - r.left) / r.width) * 100));
+        draw();
+    };
+
     window.addEventListener('mousemove', (e) => {
         if (overlay.style.display !== 'flex') return;
-        const r = area.getBoundingClientRect();
-        mX = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100));
-        draw();
+        syncPointer(e.clientX);
     });
+    window.addEventListener('touchmove', (e) => {
+        if (overlay.style.display !== 'flex' || !e.touches[0]) return;
+        e.preventDefault();
+        syncPointer(e.touches[0].clientX);
+    }, { passive: false });
+    area.addEventListener('touchstart', (e) => {
+        if (overlay.style.display !== 'flex' || !e.touches[0]) return;
+        syncPointer(e.touches[0].clientX);
+    }, { passive: true });
+
+    if (isCoarsePointer && instr) {
+        instr.innerText = 'Держи ручку пальцем в зелёной зоне!';
+    }
 
     if (restartBtn) restartBtn.onclick = reset;
     if (closeBtn) closeBtn.onclick = () => { active = false; over = true; overlay.style.display = 'none'; };

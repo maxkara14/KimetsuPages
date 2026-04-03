@@ -153,6 +153,8 @@ section h2 {
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     box-shadow: 4px 4px 15px rgba(0,0,0,0.2);
     cursor: pointer;
+    position: relative;
+    z-index: 3000;
 }
 
 section h2::before {
@@ -728,7 +730,11 @@ section h2:hover::before {
     width: 90%; 
     max-width: 320px; 
     margin: 20px auto; 
-    z-index: 10;
+    z-index: 1500;
+}
+
+.sticky-note {
+    z-index: 1500;
 }
 
 @keyframes floatWidget {
@@ -1571,6 +1577,13 @@ section h2:hover::before {
     justify-content: center;
     transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     pointer-events: auto;
+}
+
+@media (pointer: coarse) {
+    .snitch-container {
+        width: 52px;
+        height: 52px;
+    }
 }
 
 .snitch-body {
