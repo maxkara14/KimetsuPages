@@ -1551,27 +1551,19 @@ function initExtensionBreakQuest() {
     const breakCheckbox = document.getElementById('quest-cb-break');
     if (!container || !breakCheckbox) return;
 
-    const BROKEN_KEY = 'bb_broken_extension_card';
     const REQUIRED_CLICKS = 8;
     const CLICK_WINDOW_MS = 900;
 
     let currentCard = null;
     let clickStamps = [];
 
-    function clearBrokenState() {
-        localStorage.removeItem(BROKEN_KEY);
-    }
-
-    function saveBrokenState(card) {
-        const cardId = card.dataset.extCardId;
-        if (cardId) localStorage.setItem(BROKEN_KEY, cardId);
-    }
+    // Старый кэш поломанной панели больше не используем.
+    localStorage.removeItem('bb_broken_extension_card');
 
     function repairCard(card) {
         card.classList.remove('broken-extension');
         const repairBtn = card.querySelector('.repair-extension-btn');
         if (repairBtn) repairBtn.remove();
-        clearBrokenState();
         showLoFiToast('🔧 Расширение починено.', '#6b8c6c');
     }
 
@@ -1588,8 +1580,6 @@ function initExtensionBreakQuest() {
             card.appendChild(repairBtn);
         }
 
-        saveBrokenState(card);
-
         if (completeQuest && !breakCheckbox.checked) {
             breakCheckbox.checked = true;
             breakCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
@@ -1597,17 +1587,6 @@ function initExtensionBreakQuest() {
 
         if (!silent) {
             showLoFiToast('💥 Панель расширения сломана! Она висит на углу...', '#ef4444');
-        }
-    }
-
-    // Восстановление визуального состояния после перезагрузки
-    const savedCardId = localStorage.getItem(BROKEN_KEY);
-    if (savedCardId) {
-        const savedCard = container.querySelector(`.card[data-ext-card-id="${savedCardId}"]`);
-        if (savedCard) {
-            breakCard(savedCard, { completeQuest: false, silent: true });
-        } else {
-            clearBrokenState();
         }
     }
 
