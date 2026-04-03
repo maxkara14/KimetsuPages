@@ -30,32 +30,98 @@ body {
 
 .tg-btn {
     display: flex; align-items: center; gap: 8px;
-    background: rgba(25, 28, 25, 0.9);
+    background: linear-gradient(120deg, rgba(17, 20, 17, 0.96), rgba(33, 38, 33, 0.96));
     color: var(--accent-gold);
     border: 1px solid var(--border-color);
-    padding: 10px 20px;
-    border-radius: 12px; /* Мягкие углы */
+    padding: 12px 22px;
+    border-radius: 14px;
     text-decoration: none; font-size: 14px; font-weight: bold;
     text-transform: uppercase; letter-spacing: 1px;
     transition: all 0.3s ease;
     border-left: 4px solid var(--accent-green);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
 .tg-btn:hover {
     border-color: var(--accent-green); color: #fff;
-    box-shadow: 0 0 15px rgba(107, 140, 108, 0.3);
-    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(107, 140, 108, 0.25);
+    transform: translateY(-4px) scale(1.02);
 }
+
+.tg-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.24), transparent 70%);
+    transform: translateX(-140%);
+    transition: transform 0.55s ease;
+}
+
+.tg-btn:hover::before {
+    transform: translateX(140%);
+}
+
+.tg-btn .icon {
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(220, 185, 122, 0.15);
+    box-shadow: inset 0 0 0 1px rgba(220, 185, 122, 0.25);
+}
+
+.channel-btn { border-left-color: var(--accent-gold); }
+.chat-btn { border-left-color: var(--accent-green); }
+
 header {
-    background: linear-gradient(to bottom, #151715, transparent);
-    padding: 40px 20px; text-align: center;
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(circle at 85% 15%, rgba(220, 185, 122, 0.15), transparent 36%),
+                linear-gradient(to bottom, #101210, transparent);
+    padding: 48px 20px 44px;
+    text-align: center;
     border-bottom: 1px dashed var(--accent-green);
 }
 
+.hero-glow {
+    position: absolute;
+    inset: -40% -5% auto;
+    height: 240px;
+    background: radial-gradient(circle, rgba(107, 140, 108, 0.22), transparent 70%);
+    pointer-events: none;
+    animation: heroGlow 6s ease-in-out infinite;
+}
+
+@keyframes heroGlow {
+    0%, 100% { transform: translateY(0); opacity: 0.9; }
+    50% { transform: translateY(8px); opacity: 0.5; }
+}
+
 h1 {
-    margin: 0; font-size: 28px; letter-spacing: 3px;
+    margin: 0; font-size: 31px; letter-spacing: 3px;
     color: var(--accent-gold);
-    text-shadow: 0 0 15px rgba(220, 185, 122, 0.3);
+    text-shadow: 0 0 20px rgba(220, 185, 122, 0.35);
+    position: relative;
+    z-index: 1;
+}
+
+h1 span:first-child {
+    color: #f3ebcb;
+}
+
+.moon {
+    display: inline-block;
+    animation: moonFloat 3.8s ease-in-out infinite;
+    transform-origin: 50% 70%;
+}
+
+@keyframes moonFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-6px) rotate(-7deg); }
 }
 
 header p { margin: 10px 0 0 0; color: var(--accent-green); font-size: 14px; font-style: italic; }
@@ -337,9 +403,22 @@ section h2:hover::before {
 @keyframes slideMarquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
 .l-podcast-body {
-  background: var(--card-bg); border: 1px solid var(--border-color); border-top: 3px solid var(--accent-green);
+  background: linear-gradient(150deg, rgba(31, 35, 31, 0.96), rgba(22, 24, 22, 0.95)); border: 1px solid var(--border-color); border-top: 3px solid var(--accent-green);
   border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4); position: relative;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(107, 140, 108, 0.1); position: relative;
+  overflow: hidden;
+}
+
+.l-podcast-body::after {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -40px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(220, 185, 122, 0.12), transparent 65%);
+  pointer-events: none;
 }
 .l-top-section { display: flex; gap: 16px; align-items: stretch; }
 
@@ -372,6 +451,12 @@ section h2:hover::before {
   background: rgba(20, 22, 20, 0.9); border: 1px solid var(--border-color); border-radius: 10px;
   padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
   border-left: 3px solid var(--accent-gold);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.l-player:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
 }
 .l-track-info { flex-grow: 1; overflow: hidden; display: flex; flex-direction: column; gap: 6px; }
 
@@ -415,6 +500,7 @@ section h2:hover::before {
     border-radius: 14px; 
     border: 1px solid var(--border-color);
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    border-left: 3px solid rgba(220, 185, 122, 0.5);
 }
 
 /* Общий стиль для всех кнопок (широкие прямоугольники одной высоты и цвета) */
@@ -423,14 +509,14 @@ section h2:hover::before {
     border-radius: 10px; /* Закругленные прямоугольники */
     border: none;
     /* !important перебивает JS-скрипт, делая цвет всех кнопок одинаковым */
-    background: var(--accent-gold) !important; 
+    background: linear-gradient(135deg, #e8c68b, #d3aa61) !important; 
     color: #1c1e1c !important; 
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.24), inset 0 -2px 0 rgba(0,0,0,0.14);
     flex-shrink: 0;
     padding: 0;
 }
@@ -609,6 +695,71 @@ section h2:hover::before {
 }
 .pomo-controls button:hover { background: var(--accent-green); color: #fff; }
 .pomo-desc { font-size: 10px; color: var(--text-muted); margin-top: 15px; font-style: italic; }
+
+.pomodoro-widget {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(140deg, rgba(34, 37, 34, 0.95), rgba(22, 25, 22, 0.95));
+    border-radius: 16px;
+    border-top: 3px solid var(--accent-gold);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.45);
+}
+
+.pomo-orbit {
+    position: absolute;
+    inset: -45% auto auto -40%;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    border: 1px dashed rgba(220, 185, 122, 0.28);
+    animation: spinSlow 12s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes spinSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.pomo-title {
+    color: var(--accent-gold);
+    letter-spacing: 1.5px;
+}
+
+.pomo-time {
+    background: rgba(14, 17, 14, 0.65);
+    border: 1px solid rgba(220, 185, 122, 0.2);
+    border-radius: 12px;
+    padding: 6px 10px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pomo-time:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 14px rgba(220, 185, 122, 0.22);
+}
+
+.pomo-controls button {
+    border-radius: 9px;
+    padding: 7px 13px;
+    border-color: rgba(107, 140, 108, 0.7);
+}
+
+.pomo-progress-line {
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.12);
+    margin-top: 14px;
+    overflow: hidden;
+}
+
+.pomo-progress-line span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-green), var(--accent-gold));
+    transition: width 0.45s ease;
+}
 
 /* Желтый стикер */
 .sticky-note {

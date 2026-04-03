@@ -444,6 +444,7 @@ function initPomodoro() {
     const display = document.getElementById('pomo-display');
     const startBtn = document.getElementById('pomo-start');
     const resetBtn = document.getElementById('pomo-reset');
+    const progressFill = document.getElementById('pomo-progress-fill');
     
     if (!display || !startBtn || !resetBtn) return;
 
@@ -451,6 +452,12 @@ function initPomodoro() {
         const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
         const s = (timeLeft % 60).toString().padStart(2, '0');
         display.innerText = `${m}:${s}`;
+
+        if (progressFill) {
+            const fullDuration = Math.max(defaultMins * 60, 1);
+            const ratio = Math.max(0, Math.min(1, timeLeft / fullDuration));
+            progressFill.style.width = `${ratio * 100}%`;
+        }
     }
 
     // Тюнинг: Кастомный ввод времени по клику!
