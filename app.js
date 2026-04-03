@@ -1612,7 +1612,7 @@ function initExtensionBreakQuest() {
         }
 
         if (!silent) {
-            showLoFiToast('💥 Панель расширения сломана! Она висит на углу...', '#ef4444');
+            showLoFiToast('💥 Панель расширения сломана!', '#ef4444');
         }
     }
 
