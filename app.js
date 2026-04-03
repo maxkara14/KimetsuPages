@@ -125,9 +125,9 @@ function initModalEvents() {
 // 🔧 Движок для спойлеров (с гидравликой)
 function setupToggles() {
     const sections = [
-        { id: 'extensions-section', contentId: 'extensions-container', collapseDefault: true, instantToggle: true },
-        { id: 'bots-section', contentId: 'bots-container', collapseDefault: true, instantToggle: true },
-        { id: 'gallery-section', contentId: 'gallery-container', collapseDefault: true, instantToggle: true }
+        { id: 'extensions-section', contentId: 'extensions-container', collapseDefault: true },
+        { id: 'bots-section', contentId: 'bots-container', collapseDefault: true },
+        { id: 'gallery-section', contentId: 'gallery-container', collapseDefault: true }
     ];
 
     sections.forEach(sec => {
@@ -141,40 +141,17 @@ function setupToggles() {
 
         header.classList.add('toggle-header');
 
-        const wrapper = document.createElement('div');
-        wrapper.className = 'toggle-wrapper';
-        
-        const inner = document.createElement('div');
-        inner.className = 'toggle-inner';
+        const applyState = (collapsed) => {
+            header.classList.toggle('collapsed', collapsed);
+            content.hidden = collapsed;
+            sectionEl.classList.toggle('is-collapsed', collapsed);
+        };
 
-        content.parentNode.insertBefore(wrapper, content);
-        wrapper.appendChild(inner);
-        inner.appendChild(content);
-
-        if (sec.instantToggle) {
-            wrapper.style.transition = 'none';
-            inner.style.transition = 'none';
-        }
-
-        const isCollapsedByDefault = Boolean(sec.collapseDefault);
-        if (isCollapsedByDefault) {
-            wrapper.classList.add('collapsed');
-            wrapper.style.height = '0px';
-        } else {
-            wrapper.style.height = 'auto';
-        }
-
-        if (sec.collapseDefault) {
-            header.classList.add('collapsed');
-        }
+        applyState(Boolean(sec.collapseDefault));
 
         header.addEventListener('click', () => {
-            if (sec.instantToggle) {
-                const collapsed = wrapper.classList.toggle('collapsed');
-                header.classList.toggle('collapsed', collapsed);
-                wrapper.style.height = collapsed ? '0px' : 'auto';
-                return;
-            }
+            const nextCollapsed = !header.classList.contains('collapsed');
+            applyState(nextCollapsed);
         });
     });
 }
