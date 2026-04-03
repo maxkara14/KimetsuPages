@@ -125,9 +125,9 @@ function initModalEvents() {
 // 🔧 Движок для спойлеров (с гидравликой)
 function setupToggles() {
     const sections = [
-        { id: 'extensions-section', contentId: 'extensions-container', collapseDefault: true },
-        { id: 'bots-section', contentId: 'bots-container', collapseDefault: true },
-        { id: 'gallery-section', contentId: 'gallery-container', collapseDefault: true } 
+        { id: 'extensions-section', contentId: 'extensions-container', collapseDefault: true, instantToggle: false },
+        { id: 'bots-section', contentId: 'bots-container', collapseDefault: true, instantToggle: false },
+        { id: 'gallery-section', contentId: 'gallery-container', collapseDefault: true, instantToggle: true }
     ];
 
     sections.forEach(sec => {
@@ -212,6 +212,13 @@ function setupToggles() {
         };
 
         header.addEventListener('click', () => {
+            if (sec.instantToggle) {
+                const collapsed = wrapper.classList.toggle('collapsed');
+                header.classList.toggle('collapsed', collapsed);
+                wrapper.style.height = collapsed ? '0px' : 'auto';
+                return;
+            }
+
             const topBefore = header.getBoundingClientRect().top;
             header.classList.toggle('collapsed');
             animateToggle(topBefore);
@@ -237,7 +244,7 @@ function initCustomPlayer() {
     if (snitchCheckbox) {
         snitchCheckbox.onclick = (e) => {
             e.preventDefault();
-            if (!snitchCheckbox.checked) showLoFiToast("🔒 Снитч где-то рядом... Фокусируйся на таймере.", "#dcb97a");
+            if (!snitchCheckbox.checked) showLoFiToast("🔒 Сфокусируйся и жди...", "#dcb97a");
             return false;
         };
     }
@@ -1531,7 +1538,7 @@ function initQuestCheckboxes() {
     if (breakCb) {
         breakCb.onclick = (e) => {
             e.preventDefault();
-            showLoFiToast("🔒 Сломай панель быстро кликами по расширению.", "#dcb97a");
+            showLoFiToast("🔒 Ломать не строить.", "#dcb97a");
             return false;
         };
     }
@@ -1667,7 +1674,7 @@ function initBalanceMinigame() {
     // Защита чекбокса (v2.1 - ручное нажатие запрещено)
     checkbox.onclick = (e) => {
         e.preventDefault();
-        showLoFiToast("🔒 Секрет Лоны скрыт в Персонажах...", "#dcb97a");
+        showLoFiToast("🔒 Где моя ручка?...", "#dcb97a");
     };
 
     let active = false;
