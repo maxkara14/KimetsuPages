@@ -125,8 +125,8 @@ function initModalEvents() {
 // 🔧 Движок для спойлеров (с гидравликой)
 function setupToggles() {
     const sections = [
-        { id: 'extensions-section', contentId: 'extensions-container', collapseDefault: true, instantToggle: false },
-        { id: 'bots-section', contentId: 'bots-container', collapseDefault: true, instantToggle: false },
+        { id: 'extensions-section', contentId: 'extensions-container', collapseDefault: true, instantToggle: true },
+        { id: 'bots-section', contentId: 'bots-container', collapseDefault: true, instantToggle: true },
         { id: 'gallery-section', contentId: 'gallery-container', collapseDefault: true, instantToggle: true }
     ];
 
@@ -151,6 +151,11 @@ function setupToggles() {
         wrapper.appendChild(inner);
         inner.appendChild(content);
 
+        if (sec.instantToggle) {
+            wrapper.style.transition = 'none';
+            inner.style.transition = 'none';
+        }
+
         const isCollapsedByDefault = Boolean(sec.collapseDefault);
         if (isCollapsedByDefault) {
             wrapper.classList.add('collapsed');
@@ -163,67 +168,13 @@ function setupToggles() {
             header.classList.add('collapsed');
         }
 
-        const stabilizeViewport = (topBefore) => {
-            const topAfter = header.getBoundingClientRect().top;
-            const diff = topAfter - topBefore;
-            if (Math.abs(diff) > 1) {
-                window.scrollBy({ top: -diff, behavior: 'auto' });
-            }
-        };
-
-        const animateToggle = (topBefore) => {
-            const isCollapsed = wrapper.classList.contains('collapsed');
-
-            if (isCollapsed) {
-                wrapper.classList.remove('collapsed');
-                const targetHeight = inner.scrollHeight;
-                wrapper.style.height = '0px';
-
-                requestAnimationFrame(() => {
-                    wrapper.style.height = `${targetHeight}px`;
-                });
-
-                const onExpandEnd = (event) => {
-                    if (event.propertyName !== 'height') return;
-                    wrapper.style.height = 'auto';
-                    wrapper.removeEventListener('transitionend', onExpandEnd);
-                    stabilizeViewport(topBefore);
-                };
-
-                wrapper.addEventListener('transitionend', onExpandEnd);
-                return;
-            }
-
-            const currentHeight = inner.scrollHeight;
-            wrapper.style.height = `${currentHeight}px`;
-
-            requestAnimationFrame(() => {
-                wrapper.classList.add('collapsed');
-                wrapper.style.height = '0px';
-            });
-
-            const onCollapseEnd = (event) => {
-                if (event.propertyName !== 'height') return;
-                wrapper.removeEventListener('transitionend', onCollapseEnd);
-                stabilizeViewport(topBefore);
-            };
-
-            wrapper.addEventListener('transitionend', onCollapseEnd);
-        };
-
         header.addEventListener('click', () => {
             if (sec.instantToggle) {
-                const topBefore = header.getBoundingClientRect().top;
                 const collapsed = wrapper.classList.toggle('collapsed');
                 header.classList.toggle('collapsed', collapsed);
                 wrapper.style.height = collapsed ? '0px' : 'auto';
-                requestAnimationFrame(() => stabilizeViewport(topBefore));
                 return;
             }
-
-            const topBefore = header.getBoundingClientRect().top;
-            header.classList.toggle('collapsed');
-            animateToggle(topBefore);
         });
     });
 }
