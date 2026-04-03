@@ -149,6 +149,13 @@ function setupToggles() {
             header.classList.toggle('collapsed', collapsed);
             content.style.display = collapsed ? 'none' : expandedDisplay;
             sectionEl.classList.toggle('is-collapsed', collapsed);
+
+            requestAnimationFrame(() => {
+                const maxScrollY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+                if (window.scrollY > maxScrollY) {
+                    window.scrollTo(0, maxScrollY);
+                }
+            });
         };
 
         applyState(Boolean(sec.collapseDefault));
