@@ -163,7 +163,15 @@ function setupToggles() {
             header.classList.add('collapsed');
         }
 
-        const animateToggle = () => {
+        const stabilizeViewport = (topBefore) => {
+            const topAfter = header.getBoundingClientRect().top;
+            const diff = topAfter - topBefore;
+            if (Math.abs(diff) > 1) {
+                window.scrollBy({ top: diff, behavior: 'auto' });
+            }
+        };
+
+        const animateToggle = (topBefore) => {
             const isCollapsed = wrapper.classList.contains('collapsed');
 
             if (isCollapsed) {
@@ -179,6 +187,7 @@ function setupToggles() {
                     if (event.propertyName !== 'height') return;
                     wrapper.style.height = 'auto';
                     wrapper.removeEventListener('transitionend', onExpandEnd);
+                    stabilizeViewport(topBefore);
                 };
 
                 wrapper.addEventListener('transitionend', onExpandEnd);
@@ -192,11 +201,20 @@ function setupToggles() {
                 wrapper.classList.add('collapsed');
                 wrapper.style.height = '0px';
             });
+
+            const onCollapseEnd = (event) => {
+                if (event.propertyName !== 'height') return;
+                wrapper.removeEventListener('transitionend', onCollapseEnd);
+                stabilizeViewport(topBefore);
+            };
+
+            wrapper.addEventListener('transitionend', onCollapseEnd);
         };
 
         header.addEventListener('click', () => {
+            const topBefore = header.getBoundingClientRect().top;
             header.classList.toggle('collapsed');
-            animateToggle();
+            animateToggle(topBefore);
         });
     });
 }
