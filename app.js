@@ -1,11 +1,13 @@
+
 // Отрисовка расширений
 function renderExtensions() {
     const container = document.getElementById('extensions-container');
     container.innerHTML = ''; 
     
-    siteData.extensions.forEach((item) => {
+    siteData.extensions.forEach((item, idx) => {
         const card = document.createElement('div');
         card.className = 'card';
+        card.dataset.extCardId = String(idx);
         card.innerHTML = `
             <div class="post-header">
                 <div class="avatar utility">E</div>
@@ -44,6 +46,16 @@ function renderBots() {
                 <a href="${item.botFile}" download class="btn download-btn">💾 Скачать персонажа</a>
             </div>
         `;
+
+        // Секретный триггер игры
+        const penTrigger = card.querySelector('.post-author');
+        if (penTrigger && item.title.includes('🖊️')) {
+            penTrigger.style.cursor = 'help';
+            penTrigger.onclick = () => {
+                if (window.openBalanceGame) window.openBalanceGame();
+            };
+        }
+
         container.appendChild(card);
     });
 }
@@ -72,6 +84,67 @@ function renderGallery() {
     });
 }
 
+let renKittenStage = 0;
+const REN_KITTEN_FEED_X = 0.24; // 0..1 по ширине изображения Рен
+const REN_KITTEN_FEED_Y = 0.72; // 0..1 по высоте изображения Рен
+
+function removeModalKittenQuest() {
+    const hotspot = document.getElementById('modal-kitten-hotspot');
+    if (hotspot) hotspot.remove();
+}
+
+function mountModalKittenQuest() {
+    const modal = document.getElementById('gallery-modal');
+    const modalImg = document.getElementById('modal-img');
+    if (!modal || !modalImg) return;
+
+    removeModalKittenQuest();
+
+    const hotspot = document.createElement('button');
+    hotspot.type = 'button';
+    hotspot.id = 'modal-kitten-hotspot';
+    hotspot.className = 'modal-kitten-hotspot';
+    hotspot.setAttribute('aria-label', 'Покормить котёнка');
+    hotspot.textContent = renKittenStage >= 1 ? '💖' : '🐟';
+    hotspot.title = renKittenStage >= 1 ? 'Котёнок уже накормлен' : 'Покормить котёнка';
+
+    if (renKittenStage >= 1) {
+        hotspot.classList.add('fed');
+    }
+
+    const positionQuestUi = () => {
+        const rect = modalImg.getBoundingClientRect();
+        hotspot.style.left = `${rect.left + rect.width * REN_KITTEN_FEED_X}px`;
+        hotspot.style.top = `${rect.top + rect.height * REN_KITTEN_FEED_Y}px`;
+    };
+
+    hotspot.addEventListener('click', (e) => {
+        e.stopPropagation();
+
+        if (renKittenStage === 0) {
+            renKittenStage = 1;
+            hotspot.textContent = '💖';
+            hotspot.classList.add('fed');
+
+            const catQuestCb = document.getElementById('quest-cb-cat');
+            if (catQuestCb && !catQuestCb.checked) {
+                markQuestCheckboxDone(catQuestCb);
+            }
+
+            showLoFiToast('😺 Вкусняшка доставлена. Задание выполнено!', '#ef4444');
+            return;
+        }
+
+        showLoFiToast('😺 Уже сыт и доволен.');
+    });
+
+    modal.appendChild(hotspot);
+
+    positionQuestUi();
+    requestAnimationFrame(positionQuestUi);
+    window.addEventListener('resize', positionQuestUi, { once: true });
+}
+
 // === ЛОГИКА МОДАЛЬНОГО ОКНА ===
 function openGalleryModal(src, title) {
     const modal = document.getElementById('gallery-modal');
@@ -84,6 +157,12 @@ function openGalleryModal(src, title) {
     modalImg.src = src;
     captionText.innerText = title;
 
+    if (title.trim().toLowerCase() === 'рен') {
+        mountModalKittenQuest();
+    } else {
+        removeModalKittenQuest();
+    }
+
     // Закрытие при клике на оверлей (но не на картинку)
     modal.onclick = function(e) {
         if (e.target === modal) {
@@ -95,6 +174,7 @@ function openGalleryModal(src, title) {
 function closeGalleryModal() {
     const modal = document.getElementById('gallery-modal');
     if (modal) modal.classList.remove('active');
+    removeModalKittenQuest();
 }
 
 // Инициализация кнопок закрытия модалки
@@ -115,7 +195,7 @@ function setupToggles() {
     const sections = [
         { id: 'extensions-section', contentId: 'extensions-container', collapseDefault: true },
         { id: 'bots-section', contentId: 'bots-container', collapseDefault: true },
-        { id: 'gallery-section', contentId: 'gallery-container', collapseDefault: true } 
+        { id: 'gallery-section', contentId: 'gallery-container', collapseDefault: true }
     ];
 
     sections.forEach(sec => {
@@ -128,25 +208,29 @@ function setupToggles() {
         if (!header || !content) return;
 
         header.classList.add('toggle-header');
+        header.style.cursor = 'pointer';
 
-        const wrapper = document.createElement('div');
-        wrapper.className = 'toggle-wrapper';
-        
-        const inner = document.createElement('div');
-        inner.className = 'toggle-inner';
+        const computedDisplay = window.getComputedStyle(content).display;
+        const expandedDisplay = computedDisplay === 'none' ? 'block' : computedDisplay;
 
-        content.parentNode.insertBefore(wrapper, content);
-        wrapper.appendChild(inner);
-        inner.appendChild(content);
+        const applyState = (collapsed) => {
+            header.classList.toggle('collapsed', collapsed);
+            content.style.display = collapsed ? 'none' : expandedDisplay;
+            sectionEl.classList.toggle('is-collapsed', collapsed);
 
-        if (sec.collapseDefault) {
-            header.classList.add('collapsed');
-            wrapper.classList.add('collapsed');
-        }
+            requestAnimationFrame(() => {
+                const maxScrollY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+                if (window.scrollY > maxScrollY) {
+                    window.scrollTo(0, maxScrollY);
+                }
+            });
+        };
+
+        applyState(Boolean(sec.collapseDefault));
 
         header.addEventListener('click', () => {
-            header.classList.toggle('collapsed');
-            wrapper.classList.toggle('collapsed');
+            const nextCollapsed = !header.classList.contains('collapsed');
+            applyState(nextCollapsed);
         });
     });
 }
@@ -164,6 +248,15 @@ function initCustomPlayer() {
     const marqueeEl = document.getElementById('lofi-marquee');
 
     if (!audio || !playBtn || !prevBtn || !nextBtn || !volSlider || !statusEl || !freqEl || !marqueeEl) return;
+
+    const snitchCheckbox = document.getElementById('quest-cb-snitch');
+    if (snitchCheckbox) {
+        snitchCheckbox.onclick = (e) => {
+            e.preventDefault();
+            showLoFiToast("🔒 Сфокусируйся и жди...", "#dcb97a");
+            return false;
+        };
+    }
 
     const stations =[
         {
@@ -314,7 +407,7 @@ function initAsyaCat() {
     const listItems = document.querySelectorAll('.sticky-list li');
     let catCheckbox = null;
     listItems.forEach(li => {
-        if (li.innerText.includes('Покормить кошку') || li.innerText.includes('Покормить Асю')) {
+        if (li.innerText.includes('Покормить Асю')) {
             catCheckbox = li.querySelector('input[type="checkbox"]');
         }
     });
@@ -356,7 +449,9 @@ function initAsyaCat() {
             // Кормим
             isHungry = false;
             bubble.classList.remove('show');
-            if (catCheckbox) catCheckbox.checked = true;
+            if (catCheckbox) {
+                markQuestCheckboxDone(catCheckbox);
+            }
             showLoFiToast('🐈 Ням-ням! Ася сыта и ложится спать.', '#ef4444');
             
             // Засыпает обратно через 2 секунды
@@ -415,9 +510,12 @@ function initPomodoro() {
     let isRunning = false;
     let completedCycles = 0; 
     
+    let snitchTriggerTime = -1; // Время для спавна снитча
+    
     const display = document.getElementById('pomo-display');
     const startBtn = document.getElementById('pomo-start');
     const resetBtn = document.getElementById('pomo-reset');
+    const progressFill = document.getElementById('pomo-progress-fill');
     
     if (!display || !startBtn || !resetBtn) return;
 
@@ -425,6 +523,12 @@ function initPomodoro() {
         const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
         const s = (timeLeft % 60).toString().padStart(2, '0');
         display.innerText = `${m}:${s}`;
+
+        if (progressFill) {
+            const fullDuration = Math.max(defaultMins * 60, 1);
+            const ratio = Math.max(0, Math.min(1, timeLeft / fullDuration));
+            progressFill.style.width = `${ratio * 100}%`;
+        }
     }
 
     // Тюнинг: Кастомный ввод времени по клику!
@@ -450,10 +554,21 @@ function initPomodoro() {
             clearInterval(timerId);
             startBtn.innerText = '▶ Старт';
         } else {
+            // Если стартуем ровно с 25:00, заводим таймер для снитча
+            if (timeLeft === 25 * 60) {
+                snitchTriggerTime = Math.floor(Math.random() * (24 * 60 + 59)) + 1;
+            }
+
             timerId = setInterval(() => {
                 if (timeLeft > 0) { 
                     timeLeft--; 
                     updateDisplay(); 
+                    
+                    // Время пришло? Спавним!
+                    if (snitchTriggerTime !== -1 && timeLeft === snitchTriggerTime) {
+                        spawnSnitch();
+                        snitchTriggerTime = -1;
+                    }
                 } else { 
                     clearInterval(timerId); 
                     isRunning = false;
@@ -486,13 +601,123 @@ function initPomodoro() {
         timeLeft = defaultMins * 60; // Сбрасываем к последнему заданному времени
         startBtn.innerText = '▶ Старт';
         updateDisplay();
+        snitchTriggerTime = -1;
     });
+}
+
+function spawnSnitch() {
+    const snitch = document.createElement('div');
+    snitch.className = 'snitch-container';
+    snitch.innerHTML = `
+        <div class="snitch-wing left"></div>
+        <div class="snitch-body"></div>
+        <div class="snitch-wing right"></div>
+    `;
+    
+    const mobileMode = isMobileLikeDevice();
+    let lastJumpTime = 0;
+    let roamTimer = null;
+
+    const clampSnitchPosition = (x, y) => {
+        const pad = mobileMode ? 16 : 50;
+        const maxX = Math.max(pad, window.innerWidth - snitch.offsetWidth - pad);
+        const maxY = Math.max(pad, window.innerHeight - snitch.offsetHeight - pad);
+        return {
+            x: Math.max(pad, Math.min(maxX, x)),
+            y: Math.max(pad, Math.min(maxY, y))
+        };
+    };
+
+    function move() {
+        const now = Date.now();
+        const cooldown = mobileMode ? 320 : 460;
+        if (now - lastJumpTime < cooldown) return;
+
+        const rect = snitch.getBoundingClientRect();
+        const curX = rect.left;
+        const curY = rect.top;
+
+        let nX, nY, d;
+        let attempts = 0;
+        do {
+            nX = Math.random() * (window.innerWidth - 100) + 50;
+            nY = Math.random() * (window.innerHeight - 100) + 50;
+            d = Math.hypot(nX - curX, nY - curY);
+            attempts++;
+        } while (d < (mobileMode ? 90 : 170) && attempts < 50);
+
+        const clamped = clampSnitchPosition(nX, nY);
+
+        snitch.style.left = clamped.x + 'px';
+        snitch.style.top = clamped.y + 'px';
+        lastJumpTime = now;
+
+        // Визуальный эффект следа (используем существующие частицы)
+        if (!mobileMode && typeof createFireflyExplosion === 'function') {
+            createFireflyExplosion(curX + 20, curY + 20);
+        }
+    }
+    
+    // Начальная позиция
+    const initial = clampSnitchPosition(
+        Math.random() * (window.innerWidth - 100) + 50,
+        Math.random() * (window.innerHeight - 100) + 50
+    );
+    snitch.style.left = initial.x + 'px';
+    snitch.style.top = initial.y + 'px';
+    
+    document.body.appendChild(snitch);
+    showLoFiToast("⭐ Что-то золотое промелькнуло на экране...", "var(--accent-gold)");
+
+    const escapeLogic = (e) => {
+        if (mobileMode) return;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        const rect = snitch.getBoundingClientRect();
+        const sX = rect.left + rect.width / 2;
+        const sY = rect.top + rect.height / 2;
+        const dist = Math.hypot(clientX - sX, clientY - sY);
+        
+        if (dist < 80) move();
+    };
+
+    window.addEventListener('mousemove', escapeLogic);
+    window.addEventListener('touchstart', escapeLogic, { passive: true });
+
+    const catchSnitch = () => {
+        const cb = document.getElementById('quest-cb-snitch');
+        if (cb) {
+            markQuestCheckboxDone(cb);
+        }
+        showLoFiToast("🏆 СНИТЧ ПОЙМАН!", "#d4af37");
+        window.removeEventListener('mousemove', escapeLogic);
+        window.removeEventListener('touchstart', escapeLogic);
+        if (roamTimer) clearInterval(roamTimer);
+        snitch.remove();
+    };
+
+    if (mobileMode) {
+        showLoFiToast("⭐ На телефоне снитч теперь ловится так же, как на компьютере.", "var(--accent-gold)");
+        snitch.style.transition = 'left 0.28s cubic-bezier(0.22, 0.61, 0.36, 1), top 0.28s cubic-bezier(0.22, 0.61, 0.36, 1)';
+        roamTimer = setInterval(() => {
+            if (!document.body.contains(snitch)) return;
+            move();
+        }, 420);
+
+        snitch.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            catchSnitch();
+        }, { passive: false });
+    } else {
+        snitch.onclick = catchSnitch;
+    };
 }
 // === ДВИЖОК DRAG & DROP (С СЕНСОРНЫМ ПРИВОДОМ) ===
 function initDraggableWidgets() {
     const widgets = [
-        { el: document.querySelector('.widget-left'), handle: document.querySelector('.pomo-title') },
-        { el: document.querySelector('.widget-right'), handle: document.querySelector('.sticky-title') }
+        { el: document.querySelector('.widget-left'), handle: document.querySelector('.widget-left .widget-drag-handle') },
+        { el: document.querySelector('.widget-right'), handle: document.querySelector('.widget-right .widget-drag-handle') }
     ];
 
     widgets.forEach(widget => {
@@ -502,16 +727,15 @@ function initDraggableWidgets() {
         
         function dragStart(e) {
             const evt = e.type.includes('touch') ? e.touches[0] : e;
-            if (!e.type.includes('touch')) e.preventDefault(); 
+            e.preventDefault();
             
             widget.el.classList.add('is-dragging');
+            widget.el.classList.add('is-detached');
             
             const rect = widget.el.getBoundingClientRect();
-            
-            // --- ФИКС ТЕЛЕПОРТАЦИИ НА МОБИЛКАХ ---
-            // Жестко переводим в плавающий режим и сбрасываем margin
             widget.el.style.position = 'fixed';
             widget.el.style.margin = '0'; 
+            widget.el.style.width = rect.width + 'px';
             
             widget.el.style.left = rect.left + 'px';
             widget.el.style.top = rect.top + 'px';
@@ -528,15 +752,20 @@ function initDraggableWidgets() {
         }
 
         function dragMove(e) {
-            e.preventDefault(); // Глушим системный скролл
+            e.preventDefault();
             const evt = e.type.includes('touch') ? e.touches[0] : e;
             pos1 = pos3 - evt.clientX;
             pos2 = pos4 - evt.clientY;
             pos3 = evt.clientX;
             pos4 = evt.clientY;
-            
-            widget.el.style.top = (widget.el.offsetTop - pos2) + "px";
-            widget.el.style.left = (widget.el.offsetLeft - pos1) + "px";
+
+            const nextTop = widget.el.offsetTop - pos2;
+            const nextLeft = widget.el.offsetLeft - pos1;
+            const maxLeft = Math.max(0, window.innerWidth - widget.el.offsetWidth);
+            const maxTop = Math.max(0, window.innerHeight - widget.el.offsetHeight);
+
+            widget.el.style.top = Math.min(Math.max(0, nextTop), maxTop) + "px";
+            widget.el.style.left = Math.min(Math.max(0, nextLeft), maxLeft) + "px";
         }
 
         function dragEnd() {
@@ -547,7 +776,6 @@ function initDraggableWidgets() {
             widget.el.classList.remove('is-dragging');
         }
 
-        // Цепляем и мышку, и пальцы
         widget.handle.addEventListener('mousedown', dragStart);
         widget.handle.addEventListener('touchstart', dragStart, { passive: false });
     });
@@ -794,6 +1022,7 @@ function initCanvasNotes() {
         note.innerHTML = `
             <div class="canvas-handle" title="Потяни меня"></div>
             <div class="canvas-pin" title="Кликни, чтобы сменить цвет"></div>
+            <div class="canvas-ai-btn" title="AI Генерация">🤖</div>
             <div class="canvas-palette-toggle" title="Открыть/Закрыть панель инструментов">🎨</div>
             <div class="canvas-close" title="Выкинуть в мусорку">✖</div>
             
@@ -823,6 +1052,7 @@ function initCanvasNotes() {
         const ctx = canvas.getContext('2d');
         const overlayContainer = note.querySelector('.overlay-container');
         const pin = note.querySelector('.canvas-pin');
+        const aiBtn = note.querySelector('.canvas-ai-btn');
         
         let activeOverlay = null;
 
@@ -919,12 +1149,63 @@ function initCanvasNotes() {
         pin.addEventListener('click', changePinColor);
         pin.addEventListener('touchstart', changePinColor, { passive: false });
 
+        aiBtn.addEventListener('click', () => {
+            const promptVal = prompt("Введите запрос для генерации:");
+            if (promptVal) {
+                // Блокируем инструменты
+                note.classList.add('ai-processing');
+                const toolbar = note.querySelector('.canvas-toolbar');
+                if (toolbar) toolbar.style.pointerEvents = 'none';
+                canvas.style.pointerEvents = 'none';
+                
+                let elapsed = 0;
+                const genInterval = setInterval(() => {
+                    elapsed += 100;
+                    if (elapsed >= 15000) {
+                        clearInterval(genInterval);
+                        
+                        // Очистка и ошибка
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        
+                        ctx.fillStyle = '#ef4444';
+                        ctx.font = 'bold 12px monospace';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('ОШИБКА ГЕНЕРАЦИИ: 429', canvas.width / 2, canvas.height / 2);
+                        
+                        showLoFiToast("⚠️ Proxy Error 429: Too Many Requests", "#ef4444");
+                        
+                        // Квест
+                        const proxyCb = document.getElementById('quest-cb-proxy');
+                        if (proxyCb) {
+                            markQuestCheckboxDone(proxyCb);
+                        }
+                        
+                        // Разблокировка
+                        note.classList.remove('ai-processing');
+                        if (toolbar) toolbar.style.pointerEvents = 'auto';
+                        canvas.style.pointerEvents = 'auto';
+                        saveState();
+                    } else {
+                        const char = String.fromCharCode(Math.floor(Math.random() * (126 - 33 + 1)) + 33);
+                        ctx.fillStyle = '#6b8c6c';
+                        ctx.font = '10px monospace';
+                        ctx.fillText(char, Math.random() * canvas.width, Math.random() * canvas.height);
+                    }
+                }, 100);
+
+                note.aiInterval = genInterval;
+            }
+        });
+
         note.querySelector('.canvas-palette-toggle').addEventListener('click', () => {
             document.querySelectorAll('.canvas-note').forEach(n => { if (n !== note) n.classList.remove('show-tools'); });
             note.classList.toggle('show-tools');
         });
 
         note.querySelector('.canvas-close').addEventListener('click', () => {
+            if (note.aiInterval) clearInterval(note.aiInterval);
             note.style.transform = 'scale(0)';
             setTimeout(() => { note.remove(); saveAllNotesToStorage(); }, 200);
         });
@@ -1149,6 +1430,600 @@ function initCanvasNotes() {
     spawnBtn.addEventListener('click', () => { createNote(); saveAllNotesToStorage(); });
     loadNotes();
 }
+const QUEST_FRAGMENTS = ['0JvQvg==', '0YE=', '0L4=', '0YE=', '0Yw='];
+const QUEST_KEY_VALUE = 'L0N4_F1SHER_SECRET';
+const SESSION_MARKER_KEY = 'bb_terminal_state';
+const QUEST_CHECKBOX_STATE_KEY = 'bb_quest_checkbox_state';
+
+function isMobileLikeDevice() {
+    return window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 860;
+}
+
+function getQuestProgress() {
+    return JSON.parse(localStorage.getItem('bb_quest_fragments') || '[]');
+}
+
+function getQuestCheckboxState() {
+    try {
+        return JSON.parse(localStorage.getItem(QUEST_CHECKBOX_STATE_KEY) || '{}');
+    } catch {
+        return {};
+    }
+}
+
+function saveQuestCheckboxState() {
+    const checkboxState = {};
+    document.querySelectorAll('.sticky-list input[type="checkbox"]').forEach((checkbox) => {
+        if (!checkbox.id) return;
+        checkboxState[checkbox.id] = checkbox.checked;
+    });
+    localStorage.setItem(QUEST_CHECKBOX_STATE_KEY, JSON.stringify(checkboxState));
+}
+
+function restoreQuestCheckboxState() {
+    const checkboxState = getQuestCheckboxState();
+    document.querySelectorAll('.sticky-list input[type="checkbox"]').forEach((checkbox) => {
+        if (typeof checkboxState[checkbox.id] === 'boolean') {
+            checkbox.checked = checkboxState[checkbox.id];
+        }
+    });
+}
+
+function markQuestCheckboxDone(checkbox) {
+    if (!checkbox) return;
+
+    const wasChecked = checkbox.checked;
+    checkbox.checked = true;
+    saveQuestCheckboxState();
+
+    if (!wasChecked) {
+        checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+}
+
+function unlockFragment(idx) {
+    let progress = getQuestProgress();
+    if (!progress.includes(idx)) {
+        progress.push(idx);
+        localStorage.setItem('bb_quest_fragments', JSON.stringify(progress));
+        const decoded = decodeURIComponent(escape(atob(QUEST_FRAGMENTS[idx])));
+        showLoFiToast(`🧩 ПОЛУЧЕН ФРАГМЕНТ КОДА: [ ${decoded} ]`, "var(--accent-gold)");
+    }
+}
+
+function checkAllTasksDone() {
+    const checks = document.querySelectorAll('.sticky-list input[type="checkbox"]');
+    const allDone = Array.from(checks).every(c => c.checked);
+    if (allDone) {
+        ensureTerminalShortcut();
+        setTimeout(openFinalTerminal, 1500);
+    }
+}
+
+function ensureTerminalShortcut() {
+    let btnGroup = document.getElementById('canvas-btn-group');
+    if (!btnGroup) {
+        btnGroup = document.createElement('div');
+        btnGroup.id = 'canvas-btn-group';
+        document.body.appendChild(btnGroup);
+    }
+
+    if (btnGroup.querySelector('.terminal-shortcut-btn')) return;
+
+    const termBtn = document.createElement('button');
+    termBtn.type = 'button';
+    termBtn.className = 'btn terminal-shortcut-btn';
+    termBtn.innerHTML = '🖥️ Терминал';
+    termBtn.title = 'Открыть терминал Лоны';
+    termBtn.addEventListener('click', openFinalTerminal);
+    btnGroup.appendChild(termBtn);
+}
+
+function generateProtectedQuestKey() {
+    const stamp = Math.floor(Date.now() / 1000).toString(36).toUpperCase();
+    const nonce = Math.random().toString(36).slice(2, 6).toUpperCase();
+    return `${QUEST_KEY_VALUE}-${stamp}${nonce}`;
+}
+
+function setTerminalLock(reason) {
+    localStorage.setItem(SESSION_MARKER_KEY, JSON.stringify({
+        blocked: true,
+        reason,
+        at: Date.now()
+    }));
+}
+
+function getTerminalState() {
+    try {
+        return JSON.parse(localStorage.getItem(SESSION_MARKER_KEY) || '{}');
+    } catch {
+        return {};
+    }
+}
+
+function openFinalTerminal() {
+    const overlay = document.getElementById('terminal-overlay');
+    const slots = document.getElementById('terminal-slots');
+    const countEl = document.getElementById('terminal-count');
+    if (!overlay || !slots) return;
+
+    const progress = getQuestProgress();
+    slots.innerHTML = '';
+    
+    let displayIndices = [...progress].sort(() => Math.random() - 0.5);
+    
+    displayIndices.forEach(idx => {
+        const block = document.createElement('div');
+        block.className = 'letter-block';
+        block.innerText = decodeURIComponent(escape(atob(QUEST_FRAGMENTS[idx])));
+        slots.appendChild(block);
+    });
+
+    countEl.innerText = `${progress.length}/5`;
+    overlay.style.display = 'flex';
+    overlay.oncontextmenu = (e) => { e.preventDefault(); return false; };
+}
+
+function initTerminalLogic() {
+    const input = document.getElementById('terminal-input');
+    const btn = document.getElementById('terminal-submit');
+    const err = document.getElementById('terminal-error');
+    const closeBtn = document.getElementById('terminal-close');
+    const overlay = document.getElementById('terminal-overlay');
+
+    const inputWrap = document.getElementById('terminal-input-wrap');
+    const successUi = document.getElementById('terminal-result');
+    const codeDisplay = document.getElementById('terminal-code');
+    const copyTgBtn = document.getElementById('terminal-copy');
+    const statusNote = document.getElementById('terminal-meta');
+    const container = document.querySelector('.terminal-container');
+    const stateInfo = getTerminalState();
+    let protectedKey = '';
+
+    if (closeBtn) closeBtn.onclick = () => { overlay.style.display = 'none'; };
+
+    if (!btn || !input) return;
+
+    btn.onclick = () => {
+        const val = input.value.trim().toLowerCase();
+        
+        if (val.split("").reverse().join("") === "ьсосол") {
+            if (stateInfo.blocked) {
+                err.innerText = `> ДОСТУП ОТКЛОНЁН: CHECK_FAILED (${stateInfo.reason || 'SUSPICIOUS_ACTIVITY'})`;
+                err.style.display = 'block';
+                return;
+            }
+
+            protectedKey = generateProtectedQuestKey();
+            if (codeDisplay) codeDisplay.innerText = protectedKey;
+
+            if (inputWrap) inputWrap.style.display = 'none';
+            if (successUi) successUi.style.display = 'block';
+            if (container) container.classList.add('terminal-success');
+
+            showLoFiToast("🎉 СУПЕР! СИСТЕМА ВЗЛОМАНА!", "#6b8c6c");
+        } else {
+            err.innerText = '> ОШИБКА: НЕДОПУСТИМАЯ КОМБИНАЦИЯ.';
+            err.style.display = 'block';
+            setTimeout(() => { err.style.display = 'none'; }, 2000);
+        }
+    };
+
+    if (statusNote) {
+        if (stateInfo.blocked) {
+            statusNote.textContent = `⚠ Проверка активирована (${stateInfo.reason || 'suspicious'}). Получение ключа временно ограничено.`;
+            statusNote.style.color = '#ef4444';
+        } else {
+            statusNote.textContent = '🛡️ Системная проверка активна.';
+            statusNote.style.color = '#6b8c6c';
+        }
+    }
+
+    if (codeDisplay) {
+        codeDisplay.onclick = () => {
+            if (!protectedKey) return;
+            const text = codeDisplay.innerText.trim();
+            navigator.clipboard.writeText(text).then(() => {
+                showLoFiToast("📋 Код скопирован в буфер!", "var(--accent-gold)");
+            }).catch(() => {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showLoFiToast("📋 Код скопирован!", "var(--accent-gold)");
+                } catch (err) {
+                    console.error('Ошибка копирования:', err);
+                }
+                document.body.removeChild(textArea);
+            });
+        };
+    }
+
+    if (copyTgBtn) {
+        copyTgBtn.onclick = () => {
+            const tgNick = "@brun11kbron";
+            navigator.clipboard.writeText(tgNick).then(() => {
+                showLoFiToast("📋 Никнейм скопирован!", "var(--accent-gold)");
+            }).catch(() => {
+                const textArea = document.createElement("textarea");
+                textArea.value = tgNick;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showLoFiToast("📋 Никнейм скопирован!", "var(--accent-gold)");
+                } catch (err) {
+                    console.error('Ошибка копирования ТГ:', err);
+                }
+                document.body.removeChild(textArea);
+            });
+        };
+    }
+
+    if (overlay) {
+        overlay.addEventListener('copy', (e) => {
+            if (!successUi || successUi.style.display !== 'block') return;
+            e.preventDefault();
+            setTerminalLock('COPY_BLOCKED');
+            showLoFiToast('🛡️ Антифрод: прямое копирование из терминала заблокировано.', '#ef4444');
+        });
+        overlay.addEventListener('contextmenu', (e) => {
+            if (!successUi || successUi.style.display !== 'block') return;
+            e.preventDefault();
+            setTerminalLock('CONTEXT_MENU_BLOCKED');
+            showLoFiToast('🛡️ Антифрод: контекстное меню отключено.', '#ef4444');
+        });
+    }
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && overlay && overlay.style.display === 'flex') {
+            setTerminalLock('TAB_SWITCH');
+        }
+    });
+
+    let devtoolsDetector = null;
+    if (!devtoolsDetector) {
+        devtoolsDetector = setInterval(() => {
+            if (!overlay || overlay.style.display !== 'flex') return;
+            const diff = Math.abs(window.outerWidth - window.innerWidth) > 220
+                || Math.abs(window.outerHeight - window.innerHeight) > 220;
+            if (diff) {
+                setTerminalLock('DEVTOOLS_SUSPECTED');
+            }
+        }, 1200);
+    }
+}
+
+function initQuestCheckboxes() {
+    const checkboxes = document.querySelectorAll('.sticky-list input[type="checkbox"]');
+    const mapping = [1, 0, 2, 3, 4];
+
+    restoreQuestCheckboxState();
+
+    const proxyCb = document.getElementById('quest-cb-proxy');
+    if (proxyCb) {
+        proxyCb.onclick = (e) => {
+            e.preventDefault();
+            showLoFiToast("🔒 Мощности прокси перегружены...", "#dcb97a");
+            return false;
+        };
+    }
+
+    const breakCb = document.getElementById('quest-cb-break');
+    if (breakCb) {
+        breakCb.onclick = (e) => {
+            e.preventDefault();
+            showLoFiToast("🔒 Ломать не строить.", "#dcb97a");
+            return false;
+        };
+    }
+
+    const catCb = document.getElementById('quest-cb-cat');
+    if (catCb) {
+        catCb.onclick = (e) => {
+            e.preventDefault();
+            showLoFiToast('🔒 Здесь есть ещё одна кошка...');
+            return false;
+        };
+    }
+
+    checkboxes.forEach((cb, idx) => {
+        cb.addEventListener('change', () => {
+            saveQuestCheckboxState();
+            if (cb.checked) {
+                unlockFragment(mapping[idx]);
+                checkAllTasksDone();
+            }
+        });
+    });
+}
+
+function initExtensionBreakQuest() {
+    const container = document.getElementById('extensions-container');
+    const breakCheckbox = document.getElementById('quest-cb-break');
+    if (!container || !breakCheckbox) return;
+
+    const REQUIRED_CLICKS = 8;
+    const CLICK_WINDOW_MS = 900;
+
+    let currentCard = null;
+    let clickStamps = [];
+
+    // Старый кэш поломанной панели больше не используем.
+    localStorage.removeItem('bb_broken_extension_card');
+
+    function repairCard(card) {
+        card.classList.remove('broken-extension');
+        const repairBtn = card.querySelector('.repair-extension-btn');
+        if (repairBtn) repairBtn.remove();
+        showLoFiToast('🔧 Расширение починено.', '#6b8c6c');
+    }
+
+    function breakCard(card, { completeQuest = true, silent = false } = {}) {
+        if (card.classList.contains('broken-extension')) return;
+
+        card.classList.add('broken-extension');
+
+        if (!card.querySelector('.repair-extension-btn')) {
+            const repairBtn = document.createElement('button');
+            repairBtn.type = 'button';
+            repairBtn.className = 'btn repair-extension-btn';
+            repairBtn.textContent = '🔧 Починить панель';
+            card.appendChild(repairBtn);
+        }
+
+        if (completeQuest && !breakCheckbox.checked) {
+            markQuestCheckboxDone(breakCheckbox);
+        }
+
+        if (!silent) {
+            showLoFiToast('💥 Панель расширения сломана!', '#ef4444');
+        }
+    }
+
+    container.addEventListener('click', (e) => {
+        const repairBtn = e.target.closest('.repair-extension-btn');
+        if (repairBtn) {
+            e.preventDefault();
+            const brokenCard = repairBtn.closest('.card');
+            if (brokenCard) repairCard(brokenCard);
+            return;
+        }
+
+        const card = e.target.closest('.card');
+        if (!card || !container.contains(card)) return;
+
+        const now = performance.now();
+
+        if (currentCard !== card) {
+            currentCard = card;
+            clickStamps = [];
+        }
+
+        clickStamps.push(now);
+        clickStamps = clickStamps.filter((ts) => now - ts <= CLICK_WINDOW_MS);
+
+        if (clickStamps.length >= REQUIRED_CLICKS) {
+            breakCard(card);
+            clickStamps = [];
+        }
+    });
+}
+
+// === МИНИ-ИГРА: УДЕРЖАТЬ БАЛАНС (v5.6 - QUEST READY) ===
+function initBalanceMinigame() {
+    const checkbox = document.getElementById('balance-checkbox');
+    const overlay = document.getElementById('balance-game-overlay');
+    const gameContainer = overlay ? overlay.querySelector('.balance-game-container') : null;
+    const area = document.getElementById('balance-area');
+    const pen = document.getElementById('balance-pen');
+    const zone = document.getElementById('balance-zone');
+    const restartBtn = document.getElementById('balance-restart-btn');
+    const timerEl = document.getElementById('balance-timer');
+    const failDisplay = document.getElementById('balance-fail-display');
+    const failTimerSpan = failDisplay ? failDisplay.querySelector('span') : null;
+    const speech = document.getElementById('balance-speech');
+    const lonaImg = document.getElementById('balance-lona-img');
+    const instr = document.getElementById('balance-instr');
+    const closeBtn = document.getElementById('balance-close');
+    const attemptsEl = document.getElementById('balance-attempts-count');
+
+    if (!checkbox || !overlay || !area || !pen || !zone) return;
+
+    const startQuotes = [
+        "Попробуй удержать ручку в зоне...",
+        "Смотри не урони, криворучка.",
+        "Это же так просто, справишься?",
+        "Ну давай, покажи мастер-класс по балансировке.",
+        "Ой, а что это у нас тут? Ручки из... того самого места?"
+    ];
+    const failQuotes = [
+        "Ручка упала... Попробуешь ещё?",
+        "Мда, гравитация победила. Снова.",
+        "Ты даже это не можешь? Серьёзно?",
+        "Ха-ха! Опять мимо. Может, бросишь это дело?",
+        "Твоё терпение кончится раньше, чем ты победишь.",
+        "Лона разочарована. Очень сильно.",
+        "Ой-ой, кажется, кто-то переоценил свои силы."
+    ];
+    const failToasts = [
+        "💥 ПРОИГРЫШ!", "💥 ПОЗОР!", "💥 КРИВЫЕ РУКИ!", 
+        "💥 ПОПРОБУЙ СНОВА, СЛАБАК!", "💥 ГРАВИТАЦИЯ > ТЫ", 
+        "💥 ОЙ, ВСЁ!", "💥 НЕУДАЧНИК!"
+    ];
+
+    // Счётчик попыток из кэша
+    let attempts = parseInt(localStorage.getItem('bb_balance_attempts')) || 0;
+    if (attemptsEl) attemptsEl.innerText = attempts;
+
+    // Защита чекбокса (v2.1 - ручное нажатие запрещено)
+    checkbox.onclick = (e) => {
+        e.preventDefault();
+        showLoFiToast("🔒 Где моя ручка?...", "#dcb97a");
+    };
+
+    let active = false;
+    let over = false;
+    let time = 30;
+    let fTime = 0.5;
+    let loop = null;
+
+    let mX = 50; // Мышь в %
+    
+    let zPos = 40; // Позиция зоны в %
+    let zDir = 1;
+    let zSpd = 0.8;
+    let zW = 20;
+
+    const pics = {
+        n: 'img/gallery/Лона.png',
+        f: 'img/gallery/Лона (2).png',
+        w: 'img/gallery/Лона (3).png'
+    };
+
+    window.openBalanceGame = () => {
+        overlay.style.display = 'flex';
+        reset();
+    };
+
+    function reset() {
+        active = false; over = false; time = 30; fTime = 0.5;
+        zPos = 40; zW = 20;
+        
+        // Увеличиваем счётчик при каждом перезапуске
+        attempts++;
+        localStorage.setItem('bb_balance_attempts', attempts);
+        if (attemptsEl) attemptsEl.innerText = attempts;
+
+        timerEl.innerText = '30.0s';
+        if (failDisplay) failDisplay.style.display = 'none';
+        if (restartBtn) restartBtn.style.display = 'none';
+        if (instr) instr.style.display = 'block';
+        pen.classList.remove('fail');
+        if (lonaImg) lonaImg.src = pics.n;
+        if (speech) speech.innerText = startQuotes[Math.floor(Math.random() * startQuotes.length)];
+        draw();
+    }
+
+    function draw() {
+        zone.style.left = zPos + '%';
+        zone.style.width = zW + '%';
+        
+        let final = Math.max(0, Math.min(100, mX)); // Pen clamping
+        pen.style.left = final + '%';
+        pen.style.transform = `translate(-50%, -50%) rotate(0deg)`;
+
+        if (!active && !over && overlay.style.display === 'flex') {
+            if (final >= zPos && final <= zPos + zW) start();
+        }
+    }
+
+    function start() {
+        if (active) return;
+        active = true;
+        if (instr) instr.style.display = 'none';
+        last = performance.now();
+        loop = requestAnimationFrame(tick);
+    }
+
+    let last = 0;
+    function tick(now) {
+        if (!active || over) return;
+        const dt = (now - last) / 1000;
+        last = now;
+
+        // 1. ДВИЖЕНИЕ ЗОНЫ (ребаланс: спокойнее, но требовательнее к точности)
+        const progress = Math.min(1, (30 - time) / 30);
+        const flipChance = progress < 0.5 ? 0.010 : 0.003;
+        if (Math.random() < flipChance) zDir *= -1;
+        zSpd = 0.74 + Math.sin(now / 760) * 0.65 + (progress * 0.15);
+        zSpd = Math.max(0.5, Math.min(1.65, zSpd));
+        zPos += zDir * zSpd * (dt * 60);
+        zW = 24 - (progress * 4);
+
+        if (zPos <= 0) { zPos = 0; zDir = 1; }
+        if (zPos >= 100 - zW) { zPos = 100 - zW; zDir = -1; }
+
+        // 2. ТАЙМЕРЫ
+        time -= dt;
+        timerEl.innerText = Math.max(0, time).toFixed(1) + 's';
+
+        // 3. ПРОВЕРКА ЗОНЫ
+        let p = Math.max(0, Math.min(100, mX));
+        if (p < zPos || p > zPos + zW) {
+            fTime -= dt * 1.0;
+            if (failDisplay) {
+                failDisplay.style.display = 'block';
+                if (failTimerSpan) failTimerSpan.innerText = Math.max(0, fTime).toFixed(1);
+            }
+            if (fTime <= 0) { end(false); return; }
+        } else {
+            fTime = Math.min(0.5, fTime + dt * 1.2);
+            if (failDisplay && fTime >= 0.45) failDisplay.style.display = 'none';
+        }
+
+        if (time <= 0) { end(true); return; }
+
+        draw();
+        loop = requestAnimationFrame(tick);
+    }
+
+    function end(win) {
+        active = false; over = true;
+        cancelAnimationFrame(loop);
+        if (win) {
+            markQuestCheckboxDone(checkbox);
+            
+            if (lonaImg) lonaImg.src = pics.w;
+            if (speech) speech.innerText = "Невероятно! Ты справился.";
+            showLoFiToast("🖊️ ПОБЕДА!", "#6b8c6c");
+            setTimeout(() => overlay.style.display = 'none', 2500);
+        } else {
+            pen.classList.add('fail');
+            if (lonaImg) lonaImg.src = pics.f;
+            if (speech) speech.innerText = failQuotes[Math.floor(Math.random() * failQuotes.length)];
+            if (restartBtn) restartBtn.style.display = 'block';
+            if (gameContainer) {
+                gameContainer.classList.add('loss-vibrate');
+                setTimeout(() => gameContainer.classList.remove('loss-vibrate'), 520);
+            }
+            showLoFiToast(failToasts[Math.floor(Math.random() * failToasts.length)], "#ef4444");
+        }
+    }
+
+    function updatePenByClientX(clientX) {
+        const r = area.getBoundingClientRect();
+        mX = Math.max(0, Math.min(100, ((clientX - r.left) / r.width) * 100));
+        draw();
+    }
+
+    window.addEventListener('mousemove', (e) => {
+        if (overlay.style.display !== 'flex') return;
+        updatePenByClientX(e.clientX);
+    });
+
+    area.addEventListener('touchstart', (e) => {
+        if (overlay.style.display !== 'flex') return;
+        const touch = e.touches[0];
+        if (!touch) return;
+        e.preventDefault();
+        updatePenByClientX(touch.clientX);
+    }, { passive: false });
+
+    area.addEventListener('touchmove', (e) => {
+        if (overlay.style.display !== 'flex') return;
+        const touch = e.touches[0];
+        if (!touch) return;
+        e.preventDefault();
+        updatePenByClientX(touch.clientX);
+    }, { passive: false });
+
+    if (restartBtn) restartBtn.onclick = reset;
+    if (closeBtn) closeBtn.onclick = () => { active = false; over = true; overlay.style.display = 'none'; };
+}
+
 // === ЗАПУСК ВСЕХ ДВИЖКОВ ПРИ СТАРТЕ ===
 document.addEventListener('DOMContentLoaded', () => {
     // Восстановленные базовые модули:
@@ -1166,4 +2041,13 @@ document.addEventListener('DOMContentLoaded', () => {
     initCanvasNotes(); 
     initAsyaCat();
     initModalEvents();
+    initBalanceMinigame();
+    initTerminalLogic();
+    initQuestCheckboxes();
+    initExtensionBreakQuest();
+
+    const checks = document.querySelectorAll('.sticky-list input[type="checkbox"]');
+    if (checks.length && Array.from(checks).every(c => c.checked)) {
+        ensureTerminalShortcut();
+    }
 });

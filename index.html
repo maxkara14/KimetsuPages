@@ -10,41 +10,48 @@
 <body>
     <aside class="side-widget widget-left">
         <div class="pomodoro-widget">
-            <div class="pomo-title">🍅 Фокус-таймер</div>
+            <div class="pomo-orbit"></div>
+            <div class="widget-drag-handle" aria-label="Перетащить таймер">
+                <div class="pomo-title">🍅 Фокус-таймер</div>
+            </div>
             <div class="pomo-time" id="pomo-display">25:00</div>
             <div class="pomo-controls">
                 <button id="pomo-start">▶ Старт</button>
                 <button id="pomo-reset">↻ Сброс</button>
             </div>
+            <div class="pomo-progress-line"><span id="pomo-progress-fill"></span></div>
             <div class="pomo-desc">Не отвлекайся.</div>
         </div>
     </aside>
 
     <aside class="side-widget widget-right">
         <div class="sticky-note">
-            <div class="sticky-pin"></div>
-            <div class="sticky-title">План Бруника:</div>
+            <div class="widget-drag-handle" aria-label="Перетащить план Бруника">
+                <div class="sticky-pin"></div>
+                <div class="sticky-title">План Бруника:</div>
+            </div>
             <ul class="sticky-list">
-                <li><input type="checkbox"> <span>Покормить Асю</span></li>
-                <li><input type="checkbox"> <span>Выпить энергетик</span></li>
-                <li><input type="checkbox"> <span>Понюхать озон</span></li>
-                <li><input type="checkbox"> <span>PROXY ERROR 429</span></li>
-                <li><input type="checkbox"> <span>Случайно сломать расширение</span></li>
+                <li><input type="checkbox" id="quest-cb-cat"> <span>Покормить кошку</span></li>
+                <li><input type="checkbox" id="balance-checkbox"> <span>Удержать баланс</span></li>
+                <li><input type="checkbox" id="quest-cb-snitch"> <span>Не отвлекаться</span></li>
+                <li><input type="checkbox" id="quest-cb-proxy"> <span>PROXY ERROR 429</span></li>
+                <li><input type="checkbox" id="quest-cb-break"> <span>Случайно сломать расширение</span></li>
             </ul>
         </div>
     </aside>
-    <header>
-        <h1>BruniikBron: Lo-Fi & Mods 🌙</h1>
+    <header class="hero-header">
+        <div class="hero-glow"></div>
+        <h1><span>BruniikBron:</span> Lo-Fi & Mods <span class="moon">🌙</span></h1>
         <p>Твоя зона отдыха. Слушай музычку, лови светлячков и устанавливай расширения для SillyTavern.</p>
     </header>
 
     <main>
         <section class="network-links">
-            <a href="https://t.me/Brun11kBr0n" target="_blank" class="tg-btn">
-                <span class="icon">➣</span> Telegram Channel
+            <a href="https://t.me/Brun11kBr0n" target="_blank" class="tg-btn social-btn channel-btn">
+                <span class="icon">📡</span> Telegram Channel
             </a>
-            <a href="https://t.me/+rOyDlht2nJI2OTVi" target="_blank" class="tg-btn chat">
-                <span class="icon">➣</span> Telegram Chat
+            <a href="https://t.me/+rOyDlht2nJI2OTVi" target="_blank" class="tg-btn social-btn chat-btn">
+                <span class="icon">💬</span> Telegram Chat
             </a>
         </section>
 
@@ -115,10 +122,76 @@
     </main>
 
     <div id="gallery-modal" class="modal">
-        <span class="modal-close">&times;</span>
         <div class="modal-content-wrapper">
+            <span class="modal-close">&times;</span>
             <div id="modal-caption" class="modal-caption"></div>
             <img class="modal-content" id="modal-img">
+        </div>
+    </div>
+
+    <div id="balance-game-overlay" class="modal">
+        <div class="balance-game-container">
+            <div class="balance-lona-vibe">
+                <img id="balance-lona-img" src="img/gallery/Лона.png" alt="Lona">
+                <div id="balance-speech" class="l-speech-bubble">Опять ручку крутишь? Ну-ну, попробуй не уронить...</div>
+            </div>
+            
+            <div class="balance-ui">
+                <div class="balance-status-row">
+                    <div class="balance-timer" id="balance-timer">30.0s</div>
+                    <div id="balance-attempts-ui" style="font-family: monospace; font-size: 14px; color: var(--text-muted);">Попытка: <span id="balance-attempts-count">0</span></div>
+                    <div id="balance-fail-display" class="balance-fail-timer" style="display:none; color:#ef4444; font-weight:bold; font-size:24px;">⚠ <span>0.4</span>s</div>
+                </div>
+                <div class="balance-bar-container" id="balance-area" style="cursor:none; height:60px; background:#151715; border:2px solid #3b4039; border-radius:30px; position:relative; overflow:hidden; margin:20px 0;">
+                    <div id="balance-zone" class="balance-green-zone" style="position:absolute; height:100%; background:rgba(107,140,108,0.6); border-left:3px solid #6b8c6c; border-right:3px solid #6b8c6c; width:20%;"></div>
+                    <div id="balance-pen" class="balance-pen" style="position:absolute; top:50%; transform:translate(-50%, -50%); font-size:32px; z-index:10; pointer-events:none;">🖊️</div>
+                </div>
+                <div id="balance-instr" class="balance-instructions">Наведи ручку на зелёную зону!</div>
+                <button id="balance-restart-btn" class="btn" style="display:none; margin: 15px auto; background:#dcb97a; color:#1c1e1c;">🔄 ПОПРОБОВАТЬ ЕЩЁ РАЗ</button>
+            </div>
+            <span class="modal-close" id="balance-close">&times;</span>
+        </div>
+    </div>
+
+    <div id="terminal-overlay" class="modal" style="display:none; z-index: 30000; background: rgba(10, 12, 10, 0.98);">
+        <div class="terminal-container">
+            <div class="terminal-header">
+                <span class="terminal-dot red"></span>
+                <span class="terminal-dot yellow"></span>
+                <span class="terminal-dot green"></span>
+                <span class="terminal-title">LONA_OS // ACCESS_LAYER</span>
+                <span id="terminal-close" style="margin-left: auto; cursor: pointer; color: #6b8c6c; font-size: 20px;">&times;</span>
+            </div>
+            <div class="terminal-body">
+                <div id="terminal-input-wrap">
+                    <p class="t-msg">> Анализ системы... [OK]</p>
+                    <p class="t-msg">> Обнаружены фрагменты кода: <span id="terminal-count">0/5</span></p>
+                    <p class="t-msg">> Введите расшифрованный ключ доступа:</p>
+                    
+                    <div id="terminal-slots" class="letter-slots"></div>
+
+                    <div class="terminal-input-row">
+                        <input type="text" id="terminal-input" maxlength="10" autocomplete="off" placeholder="КЛЮЧ_ЗДЕСЬ...">
+                        <button id="terminal-submit" class="btn">ДЕШИФРОВАТЬ</button>
+                    </div>
+                    <div id="terminal-error" style="color: #ef4444; margin-top: 10px; display: none;">> ОШИБКА: НЕДОПУСТИМАЯ КОМБИНАЦИЯ.</div>
+                </div>
+
+                <div id="terminal-result" style="display:none; text-align: center;">
+                    <p class="t-msg">> ДОСТУП РАЗРЕШЕН. СИСТЕМА ВЗЛОМАНА.</p>
+                    <p class="t-msg">> ГЕНЕРАЦИЯ ИТОГОВОГО КОДА...</p>
+                    <div class="final-code-box" id="terminal-code" title="Кликни, чтобы скопировать">
+                        KEY_LOCKED
+                    </div>
+                    <p style="font-size: 12px; color: #6b8c6c; margin-bottom: 20px;">(Кликни на код, чтобы скопировать его)</p>
+                    <p class="t-msg">Отправь этот код Брунику в ЛС:</p>
+                    <p class="t-msg">И приложи скриншот сайта: чтобы были видны выполненные задания плана Бруника.</p>
+                    <p id="terminal-meta" style="font-size: 12px; margin: 8px 0 12px;">🛡️ Проверка целостности ключа активна.</p>
+                    <button id="terminal-copy" class="btn download-btn" style="margin-top:10px; cursor: pointer;">
+                        📋 СКОПИРОВАТЬ ТГ: @brun11kbron
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
