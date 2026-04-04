@@ -418,10 +418,11 @@ section h2:hover::before {
     height: 100%;
     background-color: rgba(10, 12, 10, 0.96);
     backdrop-filter: blur(10px);
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    padding: clamp(10px, 2.2vw, 24px);
 }
 
 .modal-content-wrapper {
@@ -429,9 +430,10 @@ section h2:hover::before {
     display: flex;
     flex-direction: column;
     align-items: center;
-    max-width: 95%;
-    max-height: 95%;
+    max-width: min(96vw, 980px);
+    max-height: calc(100vh - 28px);
     width: fit-content; /* Чтобы панелька была по ширине картинки */
+    margin: auto;
 }
 
 .modal-caption {
@@ -463,8 +465,8 @@ section h2:hover::before {
 
 .modal-close {
     position: fixed; /* Чтобы всегда была на месте */
-    top: 20px;
-    right: 35px;
+    top: max(10px, env(safe-area-inset-top, 0px));
+    right: max(12px, env(safe-area-inset-right, 0px));
     color: #fff;
     font-size: 45px;
     font-weight: bold;
@@ -1284,8 +1286,10 @@ section h2:hover::before {
     border: 3px solid var(--accent-gold);
     border-radius: 20px;
     padding: 30px;
-    max-width: 500px;
-    width: 90%;
+    max-width: 560px;
+    width: min(92vw, 560px);
+    max-height: calc(100vh - 30px);
+    overflow: auto;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -1483,8 +1487,10 @@ section h2:hover::before {
     background: #050705;
     border: 1px solid #1a201a;
     border-radius: 8px;
-    width: 90%;
-    max-width: 600px;
+    width: min(92vw, 680px);
+    max-width: 680px;
+    max-height: calc(100vh - 30px);
+    overflow: hidden;
     box-shadow: 0 0 40px rgba(107, 140, 108, 0.2);
     font-family: 'Courier New', monospace;
 }
@@ -1514,6 +1520,8 @@ section h2:hover::before {
 .terminal-body {
     padding: 25px;
     color: #6b8c6c;
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
 }
 
 .t-msg {
@@ -1628,7 +1636,28 @@ section h2:hover::before {
     .snitch-container {
         width: 38px;
         height: 38px;
-        transition-duration: 0.12s;
+        transition-duration: 0.28s;
+    }
+}
+
+@media (max-width: 700px) {
+    .balance-game-container {
+        padding: 18px;
+        border-radius: 16px;
+    }
+
+    .terminal-container {
+        width: min(95vw, 680px);
+    }
+
+    .terminal-body {
+        padding: 16px;
+    }
+
+    .modal-caption {
+        font-size: 0.95rem;
+        letter-spacing: 1.5px;
+        padding: 10px 14px;
     }
 }
 

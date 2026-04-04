@@ -635,7 +635,7 @@ function spawnSnitch() {
 
     function move() {
         const now = Date.now();
-        const cooldown = mobileMode ? 160 : 500;
+        const cooldown = mobileMode ? 320 : 460;
         if (now - lastJumpTime < cooldown) return;
 
         const rect = snitch.getBoundingClientRect();
@@ -649,7 +649,7 @@ function spawnSnitch() {
             nY = Math.random() * (window.innerHeight - 100) + 50;
             d = Math.hypot(nX - curX, nY - curY);
             attempts++;
-        } while (d < (mobileMode ? 140 : 200) && attempts < 50);
+        } while (d < (mobileMode ? 90 : 170) && attempts < 50);
 
         const clamped = clampSnitchPosition(nX, nY);
 
@@ -658,7 +658,7 @@ function spawnSnitch() {
         lastJumpTime = now;
 
         // Визуальный эффект следа (используем существующие частицы)
-        if (typeof createFireflyExplosion === 'function') {
+        if (!mobileMode && typeof createFireflyExplosion === 'function') {
             createFireflyExplosion(curX + 20, curY + 20);
         }
     }
@@ -706,10 +706,11 @@ function spawnSnitch() {
 
     if (mobileMode) {
         showLoFiToast("⭐ На телефоне снитч шустрый: нужен точный дабл-тап по центру!", "var(--accent-gold)");
+        snitch.style.transition = 'left 0.28s cubic-bezier(0.22, 0.61, 0.36, 1), top 0.28s cubic-bezier(0.22, 0.61, 0.36, 1)';
         roamTimer = setInterval(() => {
             if (!document.body.contains(snitch)) return;
             move();
-        }, 180);
+        }, 420);
 
         snitch.addEventListener('touchstart', (e) => {
             const touch = e.touches[0];
@@ -725,7 +726,7 @@ function spawnSnitch() {
 
             if (!preciseHit) {
                 bodyTapCount = 0;
-                move();
+                if (Math.random() > 0.35) move();
                 return;
             }
 
@@ -740,7 +741,7 @@ function spawnSnitch() {
             if (bodyTapCount >= 2) {
                 catchSnitch();
             } else {
-                move();
+                setTimeout(move, 80);
             }
         }, { passive: true });
     } else {
