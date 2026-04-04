@@ -162,7 +162,7 @@ section h2 {
     box-shadow: 4px 4px 15px rgba(0,0,0,0.2);
     cursor: pointer;
     position: relative;
-    z-index: 3000;
+    z-index: 20;
 }
 
 section h2::before {
@@ -752,11 +752,11 @@ section h2:hover::before {
     width: 90%; 
     max-width: 320px; 
     margin: 14px auto;
-    z-index: 1500;
+    z-index: 3200;
 }
 
 .sticky-note {
-    z-index: 1500;
+    z-index: auto;
 }
 
 @keyframes floatWidget {
@@ -778,7 +778,7 @@ section h2:hover::before {
 }
 
 @media (max-width: 1249px) {
-    .side-widget {
+    .side-widget:not(.is-detached) {
         transform: none !important;
         left: auto !important;
         top: auto !important;
@@ -836,6 +836,27 @@ section h2:hover::before {
 .pomo-title {
     color: var(--accent-gold);
     letter-spacing: 1.5px;
+}
+
+.widget-drag-handle {
+    position: relative;
+    z-index: 2;
+    display: block;
+    margin: 0;
+    padding: 0;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.widget-drag-handle:active {
+    cursor: grabbing;
+}
+
+.widget-right .widget-drag-handle {
+    position: static;
+    padding-top: 0;
 }
 
 .pomo-time {
@@ -930,15 +951,15 @@ section h2:hover::before {
 }
 /* === DRAG & DROP ИНТЕРФЕЙС === */
 .pomo-title, .sticky-title {
-    cursor: grab; /* Показываем лапку */
+    cursor: inherit; /* Показываем лапку */
 }
 .pomo-title:active, .sticky-title:active {
-    cursor: grabbing; /* Схватили! */
+    cursor: inherit; /* Схватили! */
 }
 /* Отключаем плавающую анимацию во время перетаскивания */
 .side-widget.is-dragging {
     animation: none !important;
-    z-index: 1000; /* Выводим на передний план */
+    z-index: 4200; /* Выводим на передний план */
     transform: scale(1.02);
     transition: transform 0.1s;
 }
@@ -1018,7 +1039,7 @@ section h2:hover::before {
 
 /* === РИСОВАЛКИ (CANVAS NOTES) === */
 .canvas-note {
-    position: fixed; z-index: 1500;
+    position: fixed; z-index: 3300;
     background: #e8d087; /* Тот же цвет, что и у План Лоны */
     padding: 25px 10px 10px 10px;
     border-radius: 2px 20px 2px 2px; 
@@ -1027,7 +1048,7 @@ section h2:hover::before {
     transform: rotate(-2deg);
     transition: transform 0.2s;
 }
-.canvas-note:hover { transform: rotate(0deg) scale(1.02); z-index: 1501; }
+.canvas-note:hover { transform: rotate(0deg) scale(1.02); z-index: 3301; }
 
 .canvas-handle {
     position: absolute; top: 0; left: 0; right: 0; height: 25px; cursor: grab;
@@ -1144,7 +1165,7 @@ section h2:hover::before {
     position: fixed;
     left: 16px;
     bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
-    z-index: 2500;
+    z-index: 2600;
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
@@ -1507,6 +1528,7 @@ section h2:hover::before {
     overflow: hidden;
     box-shadow: 0 0 40px rgba(107, 140, 108, 0.2);
     font-family: 'Courier New', monospace;
+    overflow-wrap: anywhere;
 }
 
 .terminal-header {
@@ -1516,6 +1538,7 @@ section h2:hover::before {
     align-items: center;
     gap: 8px;
     border-bottom: 1px solid #2a302a;
+    min-width: 0;
 }
 
 .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
@@ -1529,6 +1552,11 @@ section h2:hover::before {
     margin-left: 10px;
     text-transform: uppercase;
     letter-spacing: 1px;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .terminal-body {
@@ -1536,16 +1564,20 @@ section h2:hover::before {
     color: #6b8c6c;
     max-height: calc(100vh - 140px);
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .t-msg {
     margin-bottom: 10px;
     font-size: 14px;
-    overflow: hidden;
-    white-space: nowrap;
-    border-right: 2px solid #6b8c6c;
-    width: fit-content;
-    animation: typing 2s steps(40, end), blink-caret 0.75s step-end infinite;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    border-right: none;
+    width: 100%;
+    max-width: 100%;
+    line-height: 1.45;
+    animation: none;
 }
 
 @keyframes typing { from { width: 0 } to { width: 100% } }
@@ -1556,6 +1588,7 @@ section h2:hover::before {
     gap: 10px;
     margin: 30px 0;
     justify-content: center;
+    flex-wrap: wrap;
 }
 
 .letter-block {
@@ -1583,9 +1616,10 @@ section h2:hover::before {
     display: flex;
     gap: 10px;
     margin-top: 20px;
+    flex-wrap: wrap;
 }
 
-#final-word-input {
+#terminal-input {
     background: #0a0c0a;
     border: 1px solid #2a302a;
     color: var(--accent-gold);
@@ -1597,7 +1631,7 @@ section h2:hover::before {
     text-transform: uppercase;
 }
 
-#final-word-input:focus { border-color: var(--accent-gold); }
+#terminal-input:focus { border-color: var(--accent-gold); }
 
 /* Эффект победы */
 .terminal-success {
@@ -1614,13 +1648,16 @@ section h2:hover::before {
     color: var(--accent-gold);
     border: 2px dashed var(--accent-gold);
     padding: 20px;
-    font-size: 28px;
+    font-size: clamp(18px, 4vw, 28px);
     font-weight: 900;
-    letter-spacing: 5px;
+    letter-spacing: clamp(1px, 0.6vw, 5px);
     margin: 20px 0;
     cursor: pointer;
     transition: all 0.3s;
     text-shadow: 0 0 15px rgba(220, 185, 122, 0.5);
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-height: 1.25;
 }
 
 .final-code-box:hover {
@@ -1647,6 +1684,11 @@ section h2:hover::before {
 }
 
 @media (pointer: coarse) {
+    .widget-drag-handle {
+        padding-top: 4px;
+        padding-bottom: 4px;
+    }
+
     .snitch-container {
         width: 38px;
         height: 38px;
@@ -1666,6 +1708,15 @@ section h2:hover::before {
 
     .terminal-body {
         padding: 16px;
+    }
+
+    .terminal-input-row {
+        flex-direction: column;
+    }
+
+    .terminal-input-row .btn,
+    #terminal-input {
+        width: 100%;
     }
 
     .modal-caption {
