@@ -752,7 +752,7 @@ section h2:hover::before {
     width: 90%; 
     max-width: 320px; 
     margin: 14px auto;
-    z-index: 1500;
+    z-index: 4600;
 }
 
 .sticky-note {
@@ -1018,7 +1018,7 @@ section h2:hover::before {
 
 /* === РИСОВАЛКИ (CANVAS NOTES) === */
 .canvas-note {
-    position: fixed; z-index: 1500;
+    position: fixed; z-index: 4700;
     background: #e8d087; /* Тот же цвет, что и у План Лоны */
     padding: 25px 10px 10px 10px;
     border-radius: 2px 20px 2px 2px; 
@@ -1541,11 +1541,11 @@ section h2:hover::before {
 .t-msg {
     margin-bottom: 10px;
     font-size: 14px;
-    overflow: hidden;
-    white-space: nowrap;
-    border-right: 2px solid #6b8c6c;
-    width: fit-content;
-    animation: typing 2s steps(40, end), blink-caret 0.75s step-end infinite;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    border-right: none;
+    width: 100%;
+    animation: none;
 }
 
 @keyframes typing { from { width: 0 } to { width: 100% } }

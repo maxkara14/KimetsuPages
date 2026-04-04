@@ -735,11 +735,9 @@ function spawnSnitch() {
 }
 // === ДВИЖОК DRAG & DROP (С СЕНСОРНЫМ ПРИВОДОМ) ===
 function initDraggableWidgets() {
-    if (window.innerWidth <= 1100 || isMobileLikeDevice()) return;
-
     const widgets = [
-        { el: document.querySelector('.widget-left'), handle: document.querySelector('.pomo-title') },
-        { el: document.querySelector('.widget-right'), handle: document.querySelector('.sticky-title') }
+        { el: document.querySelector('.widget-left'), handle: document.querySelector('.pomodoro-widget') },
+        { el: document.querySelector('.widget-right'), handle: document.querySelector('.sticky-note') }
     ];
 
     widgets.forEach(widget => {
@@ -749,6 +747,10 @@ function initDraggableWidgets() {
         
         function dragStart(e) {
             const evt = e.type.includes('touch') ? e.touches[0] : e;
+            const handleRect = widget.handle.getBoundingClientRect();
+            const localY = evt.clientY - handleRect.top;
+            if (localY > 58) return;
+            if (e.target.closest('button, input, a')) return;
             if (!e.type.includes('touch')) e.preventDefault(); 
             
             widget.el.classList.add('is-dragging');
@@ -1469,8 +1471,7 @@ function unlockFragment(idx) {
     if (!progress.includes(idx)) {
         progress.push(idx);
         localStorage.setItem('bb_quest_fragments', JSON.stringify(progress));
-        const decoded = decodeURIComponent(escape(atob(QUEST_FRAGMENTS[idx])));
-        showLoFiToast(`🧩 ПОЛУЧЕН ФРАГМЕНТ КОДА: [ ${decoded} ]`, "var(--accent-gold)");
+        showLoFiToast('🧩 Прогресс обновлён.', "var(--accent-gold)");
     }
 }
 
@@ -1505,7 +1506,26 @@ function ensureTerminalShortcut() {
 function generateProtectedQuestKey() {
     const stamp = Math.floor(Date.now() / 1000).toString(36).toUpperCase();
     const nonce = Math.random().toString(36).slice(2, 6).toUpperCase();
-    return `${QUEST_KEY_VALUE}-${stamp}${nonce}`;
+    const payload = `${stamp}${nonce}`;
+    let acc = 0;
+    for (let i = 0; i < payload.length; i++) {
+        acc = (acc + payload.charCodeAt(i) * (i + 17)) % 46656;
+    }
+    const checksum = acc.toString(36).toUpperCase().padStart(3, '0');
+    return `${QUEST_KEY_VALUE}-${payload}-${checksum}`;
+}
+
+function isSessionKeyValid(key) {
+    if (!key || typeof key !== 'string') return false;
+    const parts = key.split('-');
+    if (parts.length < 3) return false;
+    const payload = parts[parts.length - 2];
+    const check = parts[parts.length - 1];
+    let acc = 0;
+    for (let i = 0; i < payload.length; i++) {
+        acc = (acc + payload.charCodeAt(i) * (i + 17)) % 46656;
+    }
+    return acc.toString(36).toUpperCase().padStart(3, '0') === check;
 }
 
 function markTerminalFraud(reason) {
@@ -1543,7 +1563,7 @@ function openFinalTerminal() {
         slots.appendChild(block);
     });
 
-    countEl.innerText = `${progress.length}/5`;
+    countEl.innerText = `${Math.min(progress.length, 5)}/5`;
     overlay.style.display = 'flex';
     overlay.oncontextmenu = (e) => { e.preventDefault(); return false; };
 }
@@ -1614,6 +1634,10 @@ function initTerminalLogic() {
         codeDisplay.onclick = () => {
             if (!protectedKey) return;
             const text = codeDisplay.innerText.trim();
+            if (!isSessionKeyValid(text)) {
+                showLoFiToast('⚠️ Код выглядит повреждённым. Сгенерируй заново.', '#ef4444');
+                return;
+            }
             navigator.clipboard.writeText(text).then(() => {
                 showLoFiToast("📋 Код скопирован в буфер!", "var(--accent-gold)");
             }).catch(() => {
