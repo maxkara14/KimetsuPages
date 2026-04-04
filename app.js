@@ -617,11 +617,24 @@ function spawnSnitch() {
         <div class="snitch-wing right"></div>
     `;
     
+    const mobileMode = isMobileLikeDevice();
     let lastJumpTime = 0;
+    let roamTimer = null;
+
+    const clampSnitchPosition = (x, y) => {
+        const pad = mobileMode ? 16 : 50;
+        const maxX = Math.max(pad, window.innerWidth - snitch.offsetWidth - pad);
+        const maxY = Math.max(pad, window.innerHeight - snitch.offsetHeight - pad);
+        return {
+            x: Math.max(pad, Math.min(maxX, x)),
+            y: Math.max(pad, Math.min(maxY, y))
+        };
+    };
 
     function move() {
         const now = Date.now();
-        if (now - lastJumpTime < 500) return;
+        const cooldown = mobileMode ? 320 : 460;
+        if (now - lastJumpTime < cooldown) return;
 
         const rect = snitch.getBoundingClientRect();
         const curX = rect.left;
@@ -634,26 +647,33 @@ function spawnSnitch() {
             nY = Math.random() * (window.innerHeight - 100) + 50;
             d = Math.hypot(nX - curX, nY - curY);
             attempts++;
-        } while (d < 200 && attempts < 50);
+        } while (d < (mobileMode ? 90 : 170) && attempts < 50);
 
-        snitch.style.left = nX + 'px';
-        snitch.style.top = nY + 'px';
+        const clamped = clampSnitchPosition(nX, nY);
+
+        snitch.style.left = clamped.x + 'px';
+        snitch.style.top = clamped.y + 'px';
         lastJumpTime = now;
 
         // Визуальный эффект следа (используем существующие частицы)
-        if (typeof createFireflyExplosion === 'function') {
+        if (!mobileMode && typeof createFireflyExplosion === 'function') {
             createFireflyExplosion(curX + 20, curY + 20);
         }
     }
     
     // Начальная позиция
-    snitch.style.left = Math.random() * (window.innerWidth - 100) + 50 + 'px';
-    snitch.style.top = Math.random() * (window.innerHeight - 100) + 50 + 'px';
+    const initial = clampSnitchPosition(
+        Math.random() * (window.innerWidth - 100) + 50,
+        Math.random() * (window.innerHeight - 100) + 50
+    );
+    snitch.style.left = initial.x + 'px';
+    snitch.style.top = initial.y + 'px';
     
     document.body.appendChild(snitch);
     showLoFiToast("⭐ Что-то золотое промелькнуло на экране...", "var(--accent-gold)");
 
     const escapeLogic = (e) => {
+        if (mobileMode) return;
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         
@@ -668,7 +688,7 @@ function spawnSnitch() {
     window.addEventListener('mousemove', escapeLogic);
     window.addEventListener('touchstart', escapeLogic, { passive: true });
 
-    snitch.onclick = () => {
+    const catchSnitch = () => {
         const cb = document.getElementById('quest-cb-snitch');
         if (cb) {
             cb.checked = true;
@@ -678,11 +698,45 @@ function spawnSnitch() {
         showLoFiToast("🏆 СНИТЧ ПОЙМАН!", "#d4af37");
         window.removeEventListener('mousemove', escapeLogic);
         window.removeEventListener('touchstart', escapeLogic);
+        if (roamTimer) clearInterval(roamTimer);
         snitch.remove();
+    };
+
+    if (mobileMode) {
+        showLoFiToast("⭐ На телефоне снитч шустрый: нужен точный тап по центру!", "var(--accent-gold)");
+        snitch.style.transition = 'left 0.28s cubic-bezier(0.22, 0.61, 0.36, 1), top 0.28s cubic-bezier(0.22, 0.61, 0.36, 1)';
+        roamTimer = setInterval(() => {
+            if (!document.body.contains(snitch)) return;
+            move();
+        }, 420);
+
+        snitch.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            if (!touch) return;
+
+            const body = snitch.querySelector('.snitch-body');
+            if (!body) return;
+            const bodyRect = body.getBoundingClientRect();
+            const bodyX = bodyRect.left + bodyRect.width / 2;
+            const bodyY = bodyRect.top + bodyRect.height / 2;
+            const dist = Math.hypot(touch.clientX - bodyX, touch.clientY - bodyY);
+            const preciseHit = dist <= Math.max(8, bodyRect.width * 0.55);
+
+            if (!preciseHit) {
+                if (Math.random() > 0.35) move();
+                return;
+            }
+
+            catchSnitch();
+        }, { passive: true });
+    } else {
+        snitch.onclick = catchSnitch;
     };
 }
 // === ДВИЖОК DRAG & DROP (С СЕНСОРНЫМ ПРИВОДОМ) ===
 function initDraggableWidgets() {
+    if (window.innerWidth <= 1100 || isMobileLikeDevice()) return;
+
     const widgets = [
         { el: document.querySelector('.widget-left'), handle: document.querySelector('.pomo-title') },
         { el: document.querySelector('.widget-right'), handle: document.querySelector('.sticky-title') }
@@ -1399,6 +1453,12 @@ function initCanvasNotes() {
 }
 // === СИСТЕМА КВЕСТА: ЛОСОСЬ (v1.0) ===
 const QUEST_FRAGMENTS = ['0JvQvg==', '0YE=', '0L4=', '0YE=', '0Yw=']; // Ло, с, о, с, ь
+const QUEST_KEY_VALUE = 'L0N4_F1SHER_SECRET';
+const ANTI_FRAUD_STORAGE_KEY = 'bb_terminal_antifraud';
+
+function isMobileLikeDevice() {
+    return window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 860;
+}
 
 function getQuestProgress() {
     return JSON.parse(localStorage.getItem('bb_quest_fragments') || '[]');
@@ -1418,7 +1478,49 @@ function checkAllTasksDone() {
     const checks = document.querySelectorAll('.sticky-list input[type="checkbox"]');
     const allDone = Array.from(checks).every(c => c.checked);
     if (allDone) {
+        ensureTerminalShortcut();
         setTimeout(openFinalTerminal, 1500);
+    }
+}
+
+function ensureTerminalShortcut() {
+    let btnGroup = document.getElementById('canvas-btn-group');
+    if (!btnGroup) {
+        btnGroup = document.createElement('div');
+        btnGroup.id = 'canvas-btn-group';
+        document.body.appendChild(btnGroup);
+    }
+
+    if (btnGroup.querySelector('.terminal-shortcut-btn')) return;
+
+    const termBtn = document.createElement('button');
+    termBtn.type = 'button';
+    termBtn.className = 'btn terminal-shortcut-btn';
+    termBtn.innerHTML = '🖥️ Терминал';
+    termBtn.title = 'Открыть терминал Лоны';
+    termBtn.addEventListener('click', openFinalTerminal);
+    btnGroup.appendChild(termBtn);
+}
+
+function generateProtectedQuestKey() {
+    const stamp = Math.floor(Date.now() / 1000).toString(36).toUpperCase();
+    const nonce = Math.random().toString(36).slice(2, 6).toUpperCase();
+    return `${QUEST_KEY_VALUE}-${stamp}${nonce}`;
+}
+
+function markTerminalFraud(reason) {
+    localStorage.setItem(ANTI_FRAUD_STORAGE_KEY, JSON.stringify({
+        blocked: true,
+        reason,
+        at: Date.now()
+    }));
+}
+
+function getTerminalFraudInfo() {
+    try {
+        return JSON.parse(localStorage.getItem(ANTI_FRAUD_STORAGE_KEY) || '{}');
+    } catch {
+        return {};
     }
 }
 
@@ -1458,7 +1560,10 @@ function initTerminalLogic() {
     const successUi = document.getElementById('terminal-success-ui');
     const codeDisplay = document.getElementById('final-code-display');
     const copyTgBtn = document.getElementById('copy-tg-btn');
+    const antiFraudHint = document.getElementById('anti-fraud-hint');
     const container = document.querySelector('.terminal-container');
+    const fraudInfo = getTerminalFraudInfo();
+    let protectedKey = '';
 
     if (closeBtn) closeBtn.onclick = () => { overlay.style.display = 'none'; };
 
@@ -1469,6 +1574,15 @@ function initTerminalLogic() {
         
         // 1. Fix 'лосось' check: Use 'val.split("").reverse().join("") === "ьсосол"'
         if (val.split("").reverse().join("") === "ьсосол") {
+            if (fraudInfo.blocked) {
+                err.innerText = `> ДОСТУП ОТКЛОНЁН: АНТИФРОД (${fraudInfo.reason || 'SUSPICIOUS_ACTIVITY'})`;
+                err.style.display = 'block';
+                return;
+            }
+
+            protectedKey = generateProtectedQuestKey();
+            if (codeDisplay) codeDisplay.innerText = protectedKey;
+
             // 2. Когда верно:
             // - Скрываем 'terminal-input-wrap'
             // - Показываем 'terminal-success-ui'
@@ -1479,14 +1593,26 @@ function initTerminalLogic() {
 
             showLoFiToast("🎉 СУПЕР! СИСТЕМА ВЗЛОМАНА!", "#6b8c6c");
         } else {
+            err.innerText = '> ОШИБКА: НЕДОПУСТИМАЯ КОМБИНАЦИЯ.';
             err.style.display = 'block';
             setTimeout(() => { err.style.display = 'none'; }, 2000);
         }
     };
 
+    if (antiFraudHint) {
+        if (fraudInfo.blocked) {
+            antiFraudHint.textContent = `⚠ Антифрод активирован (${fraudInfo.reason || 'suspicious'}). Получение ключа заблокировано.`;
+            antiFraudHint.style.color = '#ef4444';
+        } else {
+            antiFraudHint.textContent = '🛡️ Антифрод активен: копирование ключа защищено водяным знаком сессии.';
+            antiFraudHint.style.color = '#6b8c6c';
+        }
+    }
+
     // 3. Реализация click-to-copy для 'final-code-display'
     if (codeDisplay) {
         codeDisplay.onclick = () => {
+            if (!protectedKey) return;
             const text = codeDisplay.innerText.trim();
             navigator.clipboard.writeText(text).then(() => {
                 showLoFiToast("📋 Код скопирован в буфер!", "var(--accent-gold)");
@@ -1527,6 +1653,39 @@ function initTerminalLogic() {
                 document.body.removeChild(textArea);
             });
         };
+    }
+
+    if (overlay) {
+        overlay.addEventListener('copy', (e) => {
+            if (!successUi || successUi.style.display !== 'block') return;
+            e.preventDefault();
+            markTerminalFraud('COPY_BLOCKED');
+            showLoFiToast('🛡️ Антифрод: прямое копирование из терминала заблокировано.', '#ef4444');
+        });
+        overlay.addEventListener('contextmenu', (e) => {
+            if (!successUi || successUi.style.display !== 'block') return;
+            e.preventDefault();
+            markTerminalFraud('CONTEXT_MENU_BLOCKED');
+            showLoFiToast('🛡️ Антифрод: контекстное меню отключено.', '#ef4444');
+        });
+    }
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && overlay && overlay.style.display === 'flex') {
+            markTerminalFraud('TAB_SWITCH');
+        }
+    });
+
+    let devtoolsDetector = null;
+    if (!devtoolsDetector) {
+        devtoolsDetector = setInterval(() => {
+            if (!overlay || overlay.style.display !== 'flex') return;
+            const diff = Math.abs(window.outerWidth - window.innerWidth) > 220
+                || Math.abs(window.outerHeight - window.innerHeight) > 220;
+            if (diff) {
+                markTerminalFraud('DEVTOOLS_SUSPECTED');
+            }
+        }, 1200);
     }
 }
 
@@ -1649,6 +1808,7 @@ function initExtensionBreakQuest() {
 function initBalanceMinigame() {
     const checkbox = document.getElementById('balance-checkbox');
     const overlay = document.getElementById('balance-game-overlay');
+    const gameContainer = overlay ? overlay.querySelector('.balance-game-container') : null;
     const area = document.getElementById('balance-area');
     const pen = document.getElementById('balance-pen');
     const zone = document.getElementById('balance-zone');
@@ -1699,7 +1859,7 @@ function initBalanceMinigame() {
     let active = false;
     let over = false;
     let time = 30;
-    let fTime = 0.6;
+    let fTime = 0.5;
     let loop = null;
 
     let mX = 50; // Мышь в %
@@ -1721,7 +1881,7 @@ function initBalanceMinigame() {
     };
 
     function reset() {
-        active = false; over = false; time = 30; fTime = 0.6;
+        active = false; over = false; time = 30; fTime = 0.5;
         zPos = 40; zW = 20;
         
         // Увеличиваем счётчик при каждом перезапуске
@@ -1766,11 +1926,14 @@ function initBalanceMinigame() {
         const dt = (now - last) / 1000;
         last = now;
 
-        // 1. БЕЗУМНОЕ ДВИЖЕНИЕ ЗОНЫ
-        if (Math.random() < 0.05) zDir *= -1;
-        zSpd = 1.5 + Math.sin(now / 300) * 2.5 + ((30 - time) * 0.15);
+        // 1. ДВИЖЕНИЕ ЗОНЫ (ребаланс: спокойнее, но требовательнее к точности)
+        const progress = Math.min(1, (30 - time) / 30);
+        const flipChance = progress < 0.5 ? 0.010 : 0.003;
+        if (Math.random() < flipChance) zDir *= -1;
+        zSpd = 0.74 + Math.sin(now / 760) * 0.65 + (progress * 0.15);
+        zSpd = Math.max(0.5, Math.min(1.65, zSpd));
         zPos += zDir * zSpd * (dt * 60);
-        zW = 20 - ((30 - time) / 30) * 14;
+        zW = 24 - (progress * 4);
 
         if (zPos <= 0) { zPos = 0; zDir = 1; }
         if (zPos >= 100 - zW) { zPos = 100 - zW; zDir = -1; }
@@ -1782,15 +1945,15 @@ function initBalanceMinigame() {
         // 3. ПРОВЕРКА ЗОНЫ
         let p = Math.max(0, Math.min(100, mX));
         if (p < zPos || p > zPos + zW) {
-            fTime -= dt;
+            fTime -= dt * 1.0;
             if (failDisplay) {
                 failDisplay.style.display = 'block';
                 if (failTimerSpan) failTimerSpan.innerText = Math.max(0, fTime).toFixed(1);
             }
             if (fTime <= 0) { end(false); return; }
         } else {
-            fTime = 0.6;
-            if (failDisplay) failDisplay.style.display = 'none';
+            fTime = Math.min(0.5, fTime + dt * 1.2);
+            if (failDisplay && fTime >= 0.45) failDisplay.style.display = 'none';
         }
 
         if (time <= 0) { end(true); return; }
@@ -1816,18 +1979,40 @@ function initBalanceMinigame() {
             if (lonaImg) lonaImg.src = pics.f;
             if (speech) speech.innerText = failQuotes[Math.floor(Math.random() * failQuotes.length)];
             if (restartBtn) restartBtn.style.display = 'block';
-            document.body.classList.add('loud-bang');
-            setTimeout(() => document.body.classList.remove('loud-bang'), 600);
+            if (gameContainer) {
+                gameContainer.classList.add('loss-vibrate');
+                setTimeout(() => gameContainer.classList.remove('loss-vibrate'), 520);
+            }
             showLoFiToast(failToasts[Math.floor(Math.random() * failToasts.length)], "#ef4444");
         }
     }
 
+    function updatePenByClientX(clientX) {
+        const r = area.getBoundingClientRect();
+        mX = Math.max(0, Math.min(100, ((clientX - r.left) / r.width) * 100));
+        draw();
+    }
+
     window.addEventListener('mousemove', (e) => {
         if (overlay.style.display !== 'flex') return;
-        const r = area.getBoundingClientRect();
-        mX = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100));
-        draw();
+        updatePenByClientX(e.clientX);
     });
+
+    area.addEventListener('touchstart', (e) => {
+        if (overlay.style.display !== 'flex') return;
+        const touch = e.touches[0];
+        if (!touch) return;
+        e.preventDefault();
+        updatePenByClientX(touch.clientX);
+    }, { passive: false });
+
+    area.addEventListener('touchmove', (e) => {
+        if (overlay.style.display !== 'flex') return;
+        const touch = e.touches[0];
+        if (!touch) return;
+        e.preventDefault();
+        updatePenByClientX(touch.clientX);
+    }, { passive: false });
 
     if (restartBtn) restartBtn.onclick = reset;
     if (closeBtn) closeBtn.onclick = () => { active = false; over = true; overlay.style.display = 'none'; };
@@ -1854,4 +2039,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initTerminalLogic();
     initQuestCheckboxes();
     initExtensionBreakQuest();
+
+    const checks = document.querySelectorAll('.sticky-list input[type="checkbox"]');
+    if (checks.length && Array.from(checks).every(c => c.checked)) {
+        ensureTerminalShortcut();
+    }
 });
