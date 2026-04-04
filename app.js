@@ -755,56 +755,60 @@ function initDraggableWidgets() {
         }
         widget.handle = handle;
         
-        let activePointerId = null;
-        let lastClientX = 0;
-        let lastClientY = 0;
-
+        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        
         function dragStart(e) {
+            const evt = e.type.includes('touch') ? e.touches[0] : e;
             if (e.target.closest('button, input, a')) return;
-            e.preventDefault();
-
-            activePointerId = e.pointerId;
-            widget.handle.setPointerCapture(activePointerId);
+            if (!e.type.includes('touch')) e.preventDefault(); 
+            if (e.type.includes('touch')) e.preventDefault();
+            
             widget.el.classList.add('is-dragging');
-
+            
             const rect = widget.el.getBoundingClientRect();
+            
+            // --- ФИКС ТЕЛЕПОРТАЦИИ НА МОБИЛКАХ ---
+            // Жестко переводим в плавающий режим и сбрасываем margin
             widget.el.style.position = 'fixed';
-            widget.el.style.margin = '0';
-            widget.el.style.left = `${rect.left}px`;
-            widget.el.style.top = `${rect.top}px`;
-            widget.el.style.right = 'auto';
+            widget.el.style.margin = '0'; 
+            
+            widget.el.style.left = rect.left + 'px';
+            widget.el.style.top = rect.top + 'px';
+            widget.el.style.right = 'auto'; 
             widget.el.style.bottom = 'auto';
 
-            lastClientX = e.clientX;
-            lastClientY = e.clientY;
+            pos3 = evt.clientX;
+            pos4 = evt.clientY;
+            
+            document.addEventListener('mouseup', dragEnd);
+            document.addEventListener('mousemove', dragMove);
+            document.addEventListener('touchend', dragEnd);
+            document.addEventListener('touchmove', dragMove, { passive: false }); 
         }
 
         function dragMove(e) {
-            if (activePointerId === null || e.pointerId !== activePointerId) return;
-            e.preventDefault();
-
-            const dx = e.clientX - lastClientX;
-            const dy = e.clientY - lastClientY;
-            lastClientX = e.clientX;
-            lastClientY = e.clientY;
-
-            widget.el.style.left = `${widget.el.offsetLeft + dx}px`;
-            widget.el.style.top = `${widget.el.offsetTop + dy}px`;
+            e.preventDefault(); // Глушим системный скролл
+            const evt = e.type.includes('touch') ? e.touches[0] : e;
+            pos1 = pos3 - evt.clientX;
+            pos2 = pos4 - evt.clientY;
+            pos3 = evt.clientX;
+            pos4 = evt.clientY;
+            
+            widget.el.style.top = (widget.el.offsetTop - pos2) + "px";
+            widget.el.style.left = (widget.el.offsetLeft - pos1) + "px";
         }
 
-        function dragEnd(e) {
-            if (activePointerId === null || e.pointerId !== activePointerId) return;
-            if (widget.handle.hasPointerCapture(activePointerId)) {
-                widget.handle.releasePointerCapture(activePointerId);
-            }
-            activePointerId = null;
+        function dragEnd() {
+            document.removeEventListener('mouseup', dragEnd);
+            document.removeEventListener('mousemove', dragMove);
+            document.removeEventListener('touchend', dragEnd);
+            document.removeEventListener('touchmove', dragMove);
             widget.el.classList.remove('is-dragging');
         }
 
-        widget.handle.addEventListener('pointerdown', dragStart);
-        widget.handle.addEventListener('pointermove', dragMove);
-        widget.handle.addEventListener('pointerup', dragEnd);
-        widget.handle.addEventListener('pointercancel', dragEnd);
+        // Цепляем и мышку, и пальцы
+        widget.handle.addEventListener('mousedown', dragStart);
+        widget.handle.addEventListener('touchstart', dragStart, { passive: false });
     });
 }
 // === СИСТЕМА УВЕДОМЛЕНИЙ (АЧИВКИ) ===
@@ -999,7 +1003,7 @@ function initCanvasNotes() {
     btnGroup.appendChild(clearAllBtn);
     document.body.appendChild(btnGroup);
 
-    let highestZ = 6000;
+    let highestZ = 1600;
     const pinColors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#3b301a'];
 
     function saveAllNotesToStorage() {
@@ -1033,9 +1037,8 @@ function initCanvasNotes() {
         note.className = 'canvas-note';
         note.dataset.id = id;
         
-        const persistedZ = data && data.z ? parseInt(data.z, 10) || 0 : 0;
-        highestZ = Math.max(highestZ, persistedZ) + 1;
-        note.style.zIndex = highestZ;
+        highestZ++;
+        note.style.zIndex = data && data.z ? data.z : highestZ;
 
         if (data && data.x && data.y) {
             note.style.left = data.x; note.style.top = data.y;
