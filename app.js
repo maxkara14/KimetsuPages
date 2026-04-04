@@ -128,8 +128,7 @@ function mountModalKittenQuest() {
 
             const catQuestCb = document.getElementById('quest-cb-cat');
             if (catQuestCb && !catQuestCb.checked) {
-                catQuestCb.checked = true;
-                catQuestCb.dispatchEvent(new Event('change', { bubbles: true }));
+                markQuestCheckboxDone(catQuestCb);
             }
 
             showLoFiToast('😺 Вкусняшка доставлена. Задание выполнено!', '#ef4444');
@@ -451,9 +450,7 @@ function initAsyaCat() {
             isHungry = false;
             bubble.classList.remove('show');
             if (catCheckbox) {
-                catCheckbox.checked = true;
-                unlockFragment(1); // Разблокируем "с"
-                checkAllTasksDone();
+                markQuestCheckboxDone(catCheckbox);
             }
             showLoFiToast('🐈 Ням-ням! Ася сыта и ложится спать.', '#ef4444');
             
@@ -691,10 +688,8 @@ function spawnSnitch() {
     const catchSnitch = () => {
         const cb = document.getElementById('quest-cb-snitch');
         if (cb) {
-            cb.checked = true;
-            cb.dispatchEvent(new Event('change'));
+            markQuestCheckboxDone(cb);
         }
-        unlockFragment(2);
         showLoFiToast("🏆 СНИТЧ ПОЙМАН!", "#d4af37");
         window.removeEventListener('mousemove', escapeLogic);
         window.removeEventListener('touchstart', escapeLogic);
@@ -735,11 +730,9 @@ function spawnSnitch() {
 }
 // === ДВИЖОК DRAG & DROP (С СЕНСОРНЫМ ПРИВОДОМ) ===
 function initDraggableWidgets() {
-    if (window.innerWidth <= 1100 || isMobileLikeDevice()) return;
-
     const widgets = [
-        { el: document.querySelector('.widget-left'), handle: document.querySelector('.pomo-title') },
-        { el: document.querySelector('.widget-right'), handle: document.querySelector('.sticky-title') }
+        { el: document.querySelector('.widget-left'), handle: document.querySelector('.widget-left .widget-drag-handle') },
+        { el: document.querySelector('.widget-right'), handle: document.querySelector('.widget-right .widget-drag-handle') }
     ];
 
     widgets.forEach(widget => {
@@ -749,16 +742,15 @@ function initDraggableWidgets() {
         
         function dragStart(e) {
             const evt = e.type.includes('touch') ? e.touches[0] : e;
-            if (!e.type.includes('touch')) e.preventDefault(); 
+            e.preventDefault();
             
             widget.el.classList.add('is-dragging');
+            widget.el.classList.add('is-detached');
             
             const rect = widget.el.getBoundingClientRect();
-            
-            // --- ФИКС ТЕЛЕПОРТАЦИИ НА МОБИЛКАХ ---
-            // Жестко переводим в плавающий режим и сбрасываем margin
             widget.el.style.position = 'fixed';
             widget.el.style.margin = '0'; 
+            widget.el.style.width = rect.width + 'px';
             
             widget.el.style.left = rect.left + 'px';
             widget.el.style.top = rect.top + 'px';
@@ -775,15 +767,20 @@ function initDraggableWidgets() {
         }
 
         function dragMove(e) {
-            e.preventDefault(); // Глушим системный скролл
+            e.preventDefault();
             const evt = e.type.includes('touch') ? e.touches[0] : e;
             pos1 = pos3 - evt.clientX;
             pos2 = pos4 - evt.clientY;
             pos3 = evt.clientX;
             pos4 = evt.clientY;
-            
-            widget.el.style.top = (widget.el.offsetTop - pos2) + "px";
-            widget.el.style.left = (widget.el.offsetLeft - pos1) + "px";
+
+            const nextTop = widget.el.offsetTop - pos2;
+            const nextLeft = widget.el.offsetLeft - pos1;
+            const maxLeft = Math.max(0, window.innerWidth - widget.el.offsetWidth);
+            const maxTop = Math.max(0, window.innerHeight - widget.el.offsetHeight);
+
+            widget.el.style.top = Math.min(Math.max(0, nextTop), maxTop) + "px";
+            widget.el.style.left = Math.min(Math.max(0, nextLeft), maxLeft) + "px";
         }
 
         function dragEnd() {
@@ -794,7 +791,6 @@ function initDraggableWidgets() {
             widget.el.classList.remove('is-dragging');
         }
 
-        // Цепляем и мышку, и пальцы
         widget.handle.addEventListener('mousedown', dragStart);
         widget.handle.addEventListener('touchstart', dragStart, { passive: false });
     });
@@ -1198,9 +1194,7 @@ function initCanvasNotes() {
                         // Квест
                         const proxyCb = document.getElementById('quest-cb-proxy');
                         if (proxyCb) {
-                            proxyCb.checked = true;
-                            unlockFragment(3);
-                            checkAllTasksDone();
+                            markQuestCheckboxDone(proxyCb);
                         }
                         
                         // Разблокировка
@@ -1451,10 +1445,10 @@ function initCanvasNotes() {
     spawnBtn.addEventListener('click', () => { createNote(); saveAllNotesToStorage(); });
     loadNotes();
 }
-// === СИСТЕМА КВЕСТА: ЛОСОСЬ (v1.0) ===
-const QUEST_FRAGMENTS = ['0JvQvg==', '0YE=', '0L4=', '0YE=', '0Yw=']; // Ло, с, о, с, ь
+const QUEST_FRAGMENTS = ['0JvQvg==', '0YE=', '0L4=', '0YE=', '0Yw='];
 const QUEST_KEY_VALUE = 'L0N4_F1SHER_SECRET';
-const ANTI_FRAUD_STORAGE_KEY = 'bb_terminal_antifraud';
+const SESSION_MARKER_KEY = 'bb_terminal_state';
+const QUEST_CHECKBOX_STATE_KEY = 'bb_quest_checkbox_state';
 
 function isMobileLikeDevice() {
     return window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 860;
@@ -1462,6 +1456,44 @@ function isMobileLikeDevice() {
 
 function getQuestProgress() {
     return JSON.parse(localStorage.getItem('bb_quest_fragments') || '[]');
+}
+
+function getQuestCheckboxState() {
+    try {
+        return JSON.parse(localStorage.getItem(QUEST_CHECKBOX_STATE_KEY) || '{}');
+    } catch {
+        return {};
+    }
+}
+
+function saveQuestCheckboxState() {
+    const checkboxState = {};
+    document.querySelectorAll('.sticky-list input[type="checkbox"]').forEach((checkbox) => {
+        if (!checkbox.id) return;
+        checkboxState[checkbox.id] = checkbox.checked;
+    });
+    localStorage.setItem(QUEST_CHECKBOX_STATE_KEY, JSON.stringify(checkboxState));
+}
+
+function restoreQuestCheckboxState() {
+    const checkboxState = getQuestCheckboxState();
+    document.querySelectorAll('.sticky-list input[type="checkbox"]').forEach((checkbox) => {
+        if (typeof checkboxState[checkbox.id] === 'boolean') {
+            checkbox.checked = checkboxState[checkbox.id];
+        }
+    });
+}
+
+function markQuestCheckboxDone(checkbox) {
+    if (!checkbox) return;
+
+    const wasChecked = checkbox.checked;
+    checkbox.checked = true;
+    saveQuestCheckboxState();
+
+    if (!wasChecked) {
+        checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+    }
 }
 
 function unlockFragment(idx) {
@@ -1508,32 +1540,31 @@ function generateProtectedQuestKey() {
     return `${QUEST_KEY_VALUE}-${stamp}${nonce}`;
 }
 
-function markTerminalFraud(reason) {
-    localStorage.setItem(ANTI_FRAUD_STORAGE_KEY, JSON.stringify({
+function setTerminalLock(reason) {
+    localStorage.setItem(SESSION_MARKER_KEY, JSON.stringify({
         blocked: true,
         reason,
         at: Date.now()
     }));
 }
 
-function getTerminalFraudInfo() {
+function getTerminalState() {
     try {
-        return JSON.parse(localStorage.getItem(ANTI_FRAUD_STORAGE_KEY) || '{}');
+        return JSON.parse(localStorage.getItem(SESSION_MARKER_KEY) || '{}');
     } catch {
         return {};
     }
 }
 
 function openFinalTerminal() {
-    const overlay = document.getElementById('quest-final-overlay');
-    const slots = document.getElementById('letter-slots');
-    const countEl = document.getElementById('t-fragments-count');
+    const overlay = document.getElementById('terminal-overlay');
+    const slots = document.getElementById('terminal-slots');
+    const countEl = document.getElementById('terminal-count');
     if (!overlay || !slots) return;
 
     const progress = getQuestProgress();
     slots.innerHTML = '';
     
-    // Перемешиваем индексы для отображения
     let displayIndices = [...progress].sort(() => Math.random() - 0.5);
     
     displayIndices.forEach(idx => {
@@ -1549,20 +1580,19 @@ function openFinalTerminal() {
 }
 
 function initTerminalLogic() {
-    const input = document.getElementById('final-word-input');
-    const btn = document.getElementById('final-check-btn');
+    const input = document.getElementById('terminal-input');
+    const btn = document.getElementById('terminal-submit');
     const err = document.getElementById('terminal-error');
     const closeBtn = document.getElementById('terminal-close');
-    const overlay = document.getElementById('quest-final-overlay');
+    const overlay = document.getElementById('terminal-overlay');
 
-    // UI элементы для состояния успеха
     const inputWrap = document.getElementById('terminal-input-wrap');
-    const successUi = document.getElementById('terminal-success-ui');
-    const codeDisplay = document.getElementById('final-code-display');
-    const copyTgBtn = document.getElementById('copy-tg-btn');
-    const antiFraudHint = document.getElementById('anti-fraud-hint');
+    const successUi = document.getElementById('terminal-result');
+    const codeDisplay = document.getElementById('terminal-code');
+    const copyTgBtn = document.getElementById('terminal-copy');
+    const statusNote = document.getElementById('terminal-meta');
     const container = document.querySelector('.terminal-container');
-    const fraudInfo = getTerminalFraudInfo();
+    const stateInfo = getTerminalState();
     let protectedKey = '';
 
     if (closeBtn) closeBtn.onclick = () => { overlay.style.display = 'none'; };
@@ -1572,10 +1602,9 @@ function initTerminalLogic() {
     btn.onclick = () => {
         const val = input.value.trim().toLowerCase();
         
-        // 1. Fix 'лосось' check: Use 'val.split("").reverse().join("") === "ьсосол"'
         if (val.split("").reverse().join("") === "ьсосол") {
-            if (fraudInfo.blocked) {
-                err.innerText = `> ДОСТУП ОТКЛОНЁН: АНТИФРОД (${fraudInfo.reason || 'SUSPICIOUS_ACTIVITY'})`;
+            if (stateInfo.blocked) {
+                err.innerText = `> ДОСТУП ОТКЛОНЁН: CHECK_FAILED (${stateInfo.reason || 'SUSPICIOUS_ACTIVITY'})`;
                 err.style.display = 'block';
                 return;
             }
@@ -1583,10 +1612,6 @@ function initTerminalLogic() {
             protectedKey = generateProtectedQuestKey();
             if (codeDisplay) codeDisplay.innerText = protectedKey;
 
-            // 2. Когда верно:
-            // - Скрываем 'terminal-input-wrap'
-            // - Показываем 'terminal-success-ui'
-            // - Добавляем класс 'terminal-success' контейнеру
             if (inputWrap) inputWrap.style.display = 'none';
             if (successUi) successUi.style.display = 'block';
             if (container) container.classList.add('terminal-success');
@@ -1599,17 +1624,16 @@ function initTerminalLogic() {
         }
     };
 
-    if (antiFraudHint) {
-        if (fraudInfo.blocked) {
-            antiFraudHint.textContent = `⚠ Антифрод активирован (${fraudInfo.reason || 'suspicious'}). Получение ключа заблокировано.`;
-            antiFraudHint.style.color = '#ef4444';
+    if (statusNote) {
+        if (stateInfo.blocked) {
+            statusNote.textContent = `⚠ Проверка активирована (${stateInfo.reason || 'suspicious'}). Получение ключа временно ограничено.`;
+            statusNote.style.color = '#ef4444';
         } else {
-            antiFraudHint.textContent = '🛡️ Антифрод активен: копирование ключа защищено водяным знаком сессии.';
-            antiFraudHint.style.color = '#6b8c6c';
+            statusNote.textContent = '🛡️ Системная проверка активна.';
+            statusNote.style.color = '#6b8c6c';
         }
     }
 
-    // 3. Реализация click-to-copy для 'final-code-display'
     if (codeDisplay) {
         codeDisplay.onclick = () => {
             if (!protectedKey) return;
@@ -1617,7 +1641,6 @@ function initTerminalLogic() {
             navigator.clipboard.writeText(text).then(() => {
                 showLoFiToast("📋 Код скопирован в буфер!", "var(--accent-gold)");
             }).catch(() => {
-                // Fallback если clipboard API не доступен
                 const textArea = document.createElement("textarea");
                 textArea.value = text;
                 document.body.appendChild(textArea);
@@ -1633,7 +1656,6 @@ function initTerminalLogic() {
         };
     }
 
-    // 4. Логика для кнопки копирования ТГ
     if (copyTgBtn) {
         copyTgBtn.onclick = () => {
             const tgNick = "@brun11kbron";
@@ -1659,20 +1681,20 @@ function initTerminalLogic() {
         overlay.addEventListener('copy', (e) => {
             if (!successUi || successUi.style.display !== 'block') return;
             e.preventDefault();
-            markTerminalFraud('COPY_BLOCKED');
+            setTerminalLock('COPY_BLOCKED');
             showLoFiToast('🛡️ Антифрод: прямое копирование из терминала заблокировано.', '#ef4444');
         });
         overlay.addEventListener('contextmenu', (e) => {
             if (!successUi || successUi.style.display !== 'block') return;
             e.preventDefault();
-            markTerminalFraud('CONTEXT_MENU_BLOCKED');
+            setTerminalLock('CONTEXT_MENU_BLOCKED');
             showLoFiToast('🛡️ Антифрод: контекстное меню отключено.', '#ef4444');
         });
     }
 
     document.addEventListener('visibilitychange', () => {
         if (document.hidden && overlay && overlay.style.display === 'flex') {
-            markTerminalFraud('TAB_SWITCH');
+            setTerminalLock('TAB_SWITCH');
         }
     });
 
@@ -1683,7 +1705,7 @@ function initTerminalLogic() {
             const diff = Math.abs(window.outerWidth - window.innerWidth) > 220
                 || Math.abs(window.outerHeight - window.innerHeight) > 220;
             if (diff) {
-                markTerminalFraud('DEVTOOLS_SUSPECTED');
+                setTerminalLock('DEVTOOLS_SUSPECTED');
             }
         }, 1200);
     }
@@ -1691,9 +1713,10 @@ function initTerminalLogic() {
 
 function initQuestCheckboxes() {
     const checkboxes = document.querySelectorAll('.sticky-list input[type="checkbox"]');
-    const mapping = [1, 0, 2, 3, 4]; // Порядок: Ася(с), Баланс(Ло), Снитч(о), Прокси(с), Сломать(ь)
-    
-    // Защита Proxy (v2.0)
+    const mapping = [1, 0, 2, 3, 4];
+
+    restoreQuestCheckboxState();
+
     const proxyCb = document.getElementById('quest-cb-proxy');
     if (proxyCb) {
         proxyCb.onclick = (e) => {
@@ -1723,6 +1746,7 @@ function initQuestCheckboxes() {
 
     checkboxes.forEach((cb, idx) => {
         cb.addEventListener('change', () => {
+            saveQuestCheckboxState();
             if (cb.checked) {
                 unlockFragment(mapping[idx]);
                 checkAllTasksDone();
@@ -1766,8 +1790,7 @@ function initExtensionBreakQuest() {
         }
 
         if (completeQuest && !breakCheckbox.checked) {
-            breakCheckbox.checked = true;
-            breakCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+            markQuestCheckboxDone(breakCheckbox);
         }
 
         if (!silent) {
@@ -1966,9 +1989,7 @@ function initBalanceMinigame() {
         active = false; over = true;
         cancelAnimationFrame(loop);
         if (win) {
-            checkbox.checked = true;
-            unlockFragment(0); // Разблокируем "Ло"
-            checkAllTasksDone();
+            markQuestCheckboxDone(checkbox);
             
             if (lonaImg) lonaImg.src = pics.w;
             if (speech) speech.innerText = "Невероятно! Ты справился.";
