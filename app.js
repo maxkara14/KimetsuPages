@@ -698,7 +698,7 @@ function spawnSnitch() {
     };
 
     if (mobileMode) {
-        showLoFiToast("⭐ На телефоне снитч шустрый: нужен точный тап по центру!", "var(--accent-gold)");
+        showLoFiToast("⭐ На телефоне снитч теперь ловится так же, как на компьютере.", "var(--accent-gold)");
         snitch.style.transition = 'left 0.28s cubic-bezier(0.22, 0.61, 0.36, 1), top 0.28s cubic-bezier(0.22, 0.61, 0.36, 1)';
         roamTimer = setInterval(() => {
             if (!document.body.contains(snitch)) return;
@@ -706,24 +706,9 @@ function spawnSnitch() {
         }, 420);
 
         snitch.addEventListener('touchstart', (e) => {
-            const touch = e.touches[0];
-            if (!touch) return;
-
-            const body = snitch.querySelector('.snitch-body');
-            if (!body) return;
-            const bodyRect = body.getBoundingClientRect();
-            const bodyX = bodyRect.left + bodyRect.width / 2;
-            const bodyY = bodyRect.top + bodyRect.height / 2;
-            const dist = Math.hypot(touch.clientX - bodyX, touch.clientY - bodyY);
-            const preciseHit = dist <= Math.max(8, bodyRect.width * 0.55);
-
-            if (!preciseHit) {
-                if (Math.random() > 0.35) move();
-                return;
-            }
-
+            e.preventDefault();
             catchSnitch();
-        }, { passive: true });
+        }, { passive: false });
     } else {
         snitch.onclick = catchSnitch;
     };
