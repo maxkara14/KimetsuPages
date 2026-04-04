@@ -620,8 +620,6 @@ function spawnSnitch() {
     const mobileMode = isMobileLikeDevice();
     let lastJumpTime = 0;
     let roamTimer = null;
-    let lastBodyTapAt = 0;
-    let bodyTapCount = 0;
 
     const clampSnitchPosition = (x, y) => {
         const pad = mobileMode ? 16 : 50;
@@ -705,7 +703,7 @@ function spawnSnitch() {
     };
 
     if (mobileMode) {
-        showLoFiToast("⭐ На телефоне снитч шустрый: нужен точный дабл-тап по центру!", "var(--accent-gold)");
+        showLoFiToast("⭐ На телефоне снитч шустрый: нужен точный тап по центру!", "var(--accent-gold)");
         snitch.style.transition = 'left 0.28s cubic-bezier(0.22, 0.61, 0.36, 1), top 0.28s cubic-bezier(0.22, 0.61, 0.36, 1)';
         roamTimer = setInterval(() => {
             if (!document.body.contains(snitch)) return;
@@ -725,24 +723,11 @@ function spawnSnitch() {
             const preciseHit = dist <= Math.max(8, bodyRect.width * 0.55);
 
             if (!preciseHit) {
-                bodyTapCount = 0;
                 if (Math.random() > 0.35) move();
                 return;
             }
 
-            const now = Date.now();
-            if (now - lastBodyTapAt <= 280) {
-                bodyTapCount += 1;
-            } else {
-                bodyTapCount = 1;
-            }
-            lastBodyTapAt = now;
-
-            if (bodyTapCount >= 2) {
-                catchSnitch();
-            } else {
-                setTimeout(move, 80);
-            }
+            catchSnitch();
         }, { passive: true });
     } else {
         snitch.onclick = catchSnitch;
