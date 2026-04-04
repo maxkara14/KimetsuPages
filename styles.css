@@ -955,7 +955,7 @@ section h2:hover::before {
 /* Отключаем плавающую анимацию во время перетаскивания */
 .side-widget.is-dragging {
     animation: none !important;
-    z-index: 1000; /* Выводим на передний план */
+    z-index: 9800; /* Выводим на передний план */
     transform: scale(1.02);
     transition: transform 0.1s;
 }
