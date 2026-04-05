@@ -115,83 +115,6 @@
             <div class="grid-container" id="bots-container"></div>
         </section>
 
-        <section id="poker-section">
-            <h2>&ensp;РџРѕРєРµСЂ СЃ Р®Рё</h2>
-            <div class="poker-widget" id="poker-widget">
-                <div class="poker-topbar">
-                    <div class="poker-topbar-copy">
-                        <span class="poker-kicker" id="poker-match-status">Heads-Up Table // Academy Night Session</span>
-                        <span class="poker-round" id="poker-round-label">Р Р°Р·РґР°С‡Р° РµС‰С‘ РЅРµ РЅР°С‡Р°Р»Р°СЃСЊ</span>
-                    </div>
-                    <button id="poker-new-hand" class="btn download-btn poker-new-hand-btn">РќР°С‡Р°С‚СЊ РёРіСЂСѓ</button>
-                </div>
-
-                <div class="poker-opponent-card">
-                    <div class="poker-avatar-wrap">
-                        <img id="poker-yui-avatar" src="img/gallery/Yui Poker.jpg" alt="Yui Hoshikawa">
-                        <span class="poker-avatar-ring"></span>
-                    </div>
-                    <div class="poker-opponent-copy">
-                        <div class="poker-opponent-name">Yui Hoshikawa</div>
-                        <div class="poker-opponent-role">Red Ribbon Ace // Hidden Table Genius</div>
-                        <p id="poker-yui-line" class="poker-yui-line">Р®Рё СЃРїРѕРєРѕР№РЅРѕ РїРѕРїСЂР°РІР»СЏРµС‚ РєР°СЂС‚Сѓ РјРµР¶РґСѓ РїР°Р»СЊС†Р°РјРё. РљР°Р¶РµС‚СЃСЏ, РѕРЅР° СѓР¶Рµ РїСЂРѕСЃС‡РёС‚С‹РІР°РµС‚ С‚РµР±СЏ.</p>
-                    </div>
-                </div>
-
-                <div class="poker-table-shell">
-                    <div class="poker-seat poker-seat-top" id="poker-ai-seat">
-                        <div class="poker-seat-headline">
-                            <span class="poker-seat-name">Р®Рё</span>
-                            <span class="poker-dealer-chip" id="poker-ai-dealer">D</span>
-                        </div>
-                        <div class="poker-seat-stack">РЎС‚РµРє: <span id="poker-ai-stack">1500</span></div>
-                        <div class="poker-seat-bet">РЎС‚Р°РІРєР°: <span id="poker-ai-bet">0</span></div>
-                        <div class="poker-hand-rank" id="poker-ai-hand-rank">Poker face</div>
-                        <div class="poker-hand" id="poker-ai-hand"></div>
-                    </div>
-
-                    <div class="poker-table">
-                        <div class="poker-pot-ring">
-                            <span class="poker-pot-label">Р‘Р°РЅРє</span>
-                            <strong class="poker-pot-value" id="poker-pot-value">0</strong>
-                            <span class="poker-street-badge" id="poker-street-badge">Waiting</span>
-                        </div>
-                        <div class="poker-community" id="poker-community-cards"></div>
-                    </div>
-
-                    <div class="poker-seat poker-seat-bottom" id="poker-player-seat">
-                        <div class="poker-seat-headline">
-                            <span class="poker-seat-name">РўС‹</span>
-                            <span class="poker-dealer-chip" id="poker-player-dealer">D</span>
-                        </div>
-                        <div class="poker-seat-stack">РЎС‚РµРє: <span id="poker-player-stack">1500</span></div>
-                        <div class="poker-seat-bet">РЎС‚Р°РІРєР°: <span id="poker-player-bet">0</span></div>
-                        <div class="poker-hand-rank" id="poker-player-hand-rank">РўРІРѕСЏ СЂСѓРєР°</div>
-                        <div class="poker-hand" id="poker-player-hand"></div>
-                    </div>
-                </div>
-
-                <div class="poker-controls">
-                    <div class="poker-action-row">
-                        <button id="poker-fold-btn" class="btn btn-danger">Р¤РѕР»Рґ</button>
-                        <button id="poker-call-btn" class="btn">Р§РµРє / РљРѕР»Р»</button>
-                        <button id="poker-raise-btn" class="btn download-btn">Р РµР№Р·</button>
-                    </div>
-
-                    <div class="poker-raise-box">
-                        <label class="poker-raise-label" for="poker-raise-slider">Р Р°Р·РјРµСЂ СЃС‚Р°РІРєРё</label>
-                        <input type="range" id="poker-raise-slider" min="20" max="200" value="40" step="10">
-                        <div class="poker-raise-readout" id="poker-raise-readout">Р РµР№Р· РґРѕ 40</div>
-                    </div>
-                </div>
-
-                <div class="poker-log-wrap">
-                    <div class="poker-log-title">РСЃС‚РѕСЂРёСЏ СЂР°Р·РґР°С‡Рё</div>
-                    <div class="poker-log" id="poker-log"></div>
-                </div>
-            </div>
-        </section>
-
         <section id="gallery-section">
             <h2>&ensp;Галерея</h2>
             <div class="gallery-grid" id="gallery-container"></div>
@@ -274,6 +197,5 @@
 
     <script src="data.js"></script>
     <script src="app.obfuscated.js"></script>
-    <script src="poker.js"></script>
 </body>
 </html>
