@@ -4179,6 +4179,9 @@ body.poker-open .poker-launch-btn {
     }
 
     #firefly-score-board {
+        right: 16px;
+        left: auto;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
         width: var(--desktop-action-width, 198px);
         min-width: var(--desktop-action-width, 198px);
         max-width: var(--desktop-action-width, 198px);
