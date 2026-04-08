@@ -12,12 +12,12 @@
         <div class="pomodoro-widget">
             <div class="pomo-orbit"></div>
             <div class="widget-drag-handle" aria-label="Перетащить таймер">
-                <div class="pomo-title">🍅 Фокус-таймер</div>
+                <div class="pomo-title"><span class="inline-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 6c4.7 0 8.5 3.2 8.5 7.6 0 4.3-3.6 7.9-8.5 7.9S3.5 18 3.5 13.6C3.5 9.2 7.3 6 12 6Z" fill="currentColor"/><path d="M12 6c0-1.6.8-2.8 2.3-3.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M9 5.4c1.2.8 2 .8 3 0 1.1-.8 2.4-1 3.8-.4-1.2 1.7-2.7 2.5-4.8 2.5-2.2 0-3.9-.7-5-2.2 1.2-.7 2.1-.7 3 .1Z" fill="#5b7a61"/></svg></span><span>Фокус-таймер</span></div>
             </div>
             <div class="pomo-time" id="pomo-display">25:00</div>
             <div class="pomo-controls">
-                <button id="pomo-start">▶ Старт</button>
-                <button id="pomo-reset">↻ Сброс</button>
+                <button id="pomo-start"><span class="inline-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m8 6 10 6-10 6Z" fill="currentColor"/></svg></span><span>Старт</span></button>
+                <button id="pomo-reset"><span class="pomo-glyph" aria-hidden="true">↻</span><span>Сброс</span></button>
             </div>
             <div class="pomo-progress-line"><span id="pomo-progress-fill"></span></div>
             <div class="pomo-desc">Не отвлекайся.</div>
@@ -39,19 +39,20 @@
             </ul>
         </div>
     </aside>
+    <button id="poker-launch-btn" class="btn download-btn poker-launch-btn" type="button">Покер с Юи</button>
     <header class="hero-header">
         <div class="hero-glow"></div>
-        <h1><span>BruniikBron:</span> Lo-Fi & Mods <span class="moon">🌙</span></h1>
+        <h1><span>BruniikBron:</span> Lo-Fi & Mods <span class="moon inline-icon hero-inline-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14.5 3.3a8.8 8.8 0 1 0 6.2 15.2A9.7 9.7 0 0 1 14.5 3.3Z" fill="currentColor"/></svg></span></h1>
         <p>Твоя зона отдыха. Слушай музычку, лови светлячков и устанавливай расширения для SillyTavern.</p>
     </header>
 
     <main>
         <section class="network-links">
             <a href="https://t.me/Brun11kBr0n" target="_blank" class="tg-btn social-btn channel-btn">
-                <span class="icon">📡</span> Telegram Channel
+                <span class="icon icon-svg" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 11.8 20 4l-4.7 16-3.7-5-4.2 3 .8-5.3L4 11.8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m20 4-11.4 8.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span> Telegram Channel
             </a>
             <a href="https://t.me/+rOyDlht2nJI2OTVi" target="_blank" class="tg-btn social-btn chat-btn">
-                <span class="icon">💬</span> Telegram Chat
+                <span class="icon icon-svg" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 6.5h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-8l-4.5 3v-3H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 11h8M8 14h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span> Telegram Chat
             </a>
         </section>
 
@@ -62,7 +63,7 @@
                 <div class="l-avatar-image"></div>
             </div>
             <div class="l-speech-bubble">
-                Тихо-тихо... Включай Lo-Fi, бери горячий чай и устраивайся поудобнее... Мои расширения лежат чуть ниже ☕🌿
+                Тихо-тихо... Включай Lo-Fi, бери горячий чай и устраивайся поудобнее... <span class="speech-nowrap">Расширения лежат чуть ниже <span class="speech-inline-icons" aria-hidden="true">☕️ 🍃</span></span>
             </div>
         </div>
 
@@ -81,12 +82,12 @@
                     <audio id="lofi-audio" preload="none"></audio>
 
                     <div class="custom-lofi-player">
-                        <button id="lofi-prev-btn" class="c-play-btn c-radio-btn" type="button">⏮</button>
+                        <button id="lofi-prev-btn" class="c-play-btn c-radio-btn" type="button"><span class="inline-icon lofi-radio-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 6v12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="m15 8-5 4 5 4Z" fill="currentColor"/><path d="m10 8-5 4 5 4Z" fill="currentColor"/></svg></span></button>
                         <button id="lofi-play-btn" class="c-play-btn c-icon-btn" type="button" aria-label="Play / Pause">
-                            <span class="play-icon">▶</span>
-                            <span class="pause-icon">⏸</span>
+                            <span class="play-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m8 6 10 6-10 6Z" fill="currentColor"/></svg></span>
+                            <span class="pause-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/></svg></span>
                         </button>    
-                        <button id="lofi-next-btn" class="c-play-btn c-radio-btn" type="button">⏭</button>
+                        <button id="lofi-next-btn" class="c-play-btn c-radio-btn" type="button"><span class="inline-icon lofi-radio-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 6v12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="m9 8 5 4-5 4Z" fill="currentColor"/><path d="m14 8 5 4-5 4Z" fill="currentColor"/></svg></span></button>
 
                         <div class="c-vol-wrap">
                             <span class="c-vol-label">VOL</span>
@@ -115,6 +116,120 @@
             <div class="grid-container" id="bots-container"></div>
         </section>
 
+        <section id="poker-section">
+            <h2>&ensp;Покер с Юи</h2>
+            <div class="poker-widget" id="poker-widget">
+                <div class="poker-topbar">
+                    <div class="poker-topbar-copy">
+                        <span class="poker-kicker" id="poker-match-status">Блайнды 10/20 // Ночная партия</span>
+                        <span class="poker-round" id="poker-round-label">Раздача ещё не началась</span>
+                    </div>
+                    <div class="poker-topbar-tools">
+                        <div class="poker-blind-picker" aria-label="Выбор уровня блайндов">
+                            <span class="poker-blind-picker-label">Темп</span>
+                            <button type="button" class="poker-blind-btn is-active" data-blind-preset="low">Низкий</button>
+                            <button type="button" class="poker-blind-btn" data-blind-preset="medium">Средний</button>
+                            <button type="button" class="poker-blind-btn" data-blind-preset="high">Высокий</button>
+                        </div>
+                        <button id="poker-new-hand" class="btn download-btn poker-new-hand-btn">Новая раздача</button>
+                    </div>
+                </div>
+
+                <div class="poker-stats-strip">
+                    <div class="poker-stat-chip">
+                        <span class="poker-stat-label">Победы</span>
+                        <strong id="poker-stat-human-wins">0</strong>
+                    </div>
+                    <div class="poker-stat-chip">
+                        <span class="poker-stat-label">Победы Юи</span>
+                        <strong id="poker-stat-ai-wins">0</strong>
+                    </div>
+                    <div class="poker-stat-chip">
+                        <span class="poker-stat-label">Партий</span>
+                        <strong id="poker-stat-total">0</strong>
+                    </div>
+                    <div class="poker-stat-chip">
+                        <span class="poker-stat-label">Винрейт</span>
+                        <strong id="poker-stat-winrate">0%</strong>
+                    </div>
+                    <div class="poker-stat-chip">
+                        <span class="poker-stat-label">Макс. банк</span>
+                        <strong id="poker-stat-max-pot">0</strong>
+                    </div>
+                </div>
+
+                <div class="poker-opponent-card">
+                    <div class="poker-avatar-wrap">
+                        <img id="poker-yui-avatar" src="img/gallery/Yui Poker.jpg" alt="Хошикава Юи">
+                        <span class="poker-avatar-ring"></span>
+                    </div>
+                    <div class="poker-opponent-copy">
+                        <div class="poker-opponent-name">Хошикава Юи</div>
+                        <div class="poker-opponent-role">Скрытый туз // азартный режим</div>
+                        <p id="poker-yui-line" class="poker-yui-line">Юи спокойно крутит карту между пальцами. Кажется, она уже просчитывает тебя.</p>
+                    </div>
+                </div>
+
+                <div class="poker-table-shell">
+                    <div class="poker-seat poker-seat-top" id="poker-ai-seat">
+                        <div class="poker-seat-headline">
+                            <span class="poker-seat-name">Юи</span>
+                            <span class="poker-dealer-chip" id="poker-ai-dealer">Б</span>
+                        </div>
+                        <div class="poker-seat-stack">Стек: <span id="poker-ai-stack">1500</span></div>
+                        <div class="poker-seat-bet">Ставка: <span id="poker-ai-bet">0</span></div>
+                        <div class="poker-hand-rank" id="poker-ai-hand-rank">Ничего не выдаёт</div>
+                        <div class="poker-hand" id="poker-ai-hand"></div>
+                    </div>
+
+                    <div class="poker-table">
+                        <div class="poker-pot-ring">
+                            <span class="poker-pot-label">Банк</span>
+                            <strong class="poker-pot-value" id="poker-pot-value">0</strong>
+                            <span class="poker-street-badge" id="poker-street-badge">Ожидание</span>
+                        </div>
+                        <div class="poker-community" id="poker-community-cards"></div>
+                    </div>
+
+                    <div class="poker-seat poker-seat-bottom" id="poker-player-seat">
+                        <div class="poker-seat-headline">
+                            <span class="poker-seat-name">Ты</span>
+                            <span class="poker-dealer-chip" id="poker-player-dealer">Б</span>
+                        </div>
+                        <div class="poker-seat-stack">Стек: <span id="poker-player-stack">1500</span></div>
+                        <div class="poker-seat-bet">Ставка: <span id="poker-player-bet">0</span></div>
+                        <div class="poker-hand-rank" id="poker-player-hand-rank">Твоя рука</div>
+                        <div class="poker-hand" id="poker-player-hand"></div>
+                    </div>
+                </div>
+
+                <div class="poker-controls">
+                    <div class="poker-action-row">
+                        <button id="poker-fold-btn" class="btn btn-danger poker-action-btn poker-action-btn-fold">Сбросить</button>
+                        <button id="poker-call-btn" class="btn poker-action-btn poker-action-btn-call">Уравнять</button>
+                        <button id="poker-raise-btn" class="btn download-btn poker-action-btn poker-action-btn-raise">Повысить</button>
+                    </div>
+
+                    <div class="poker-quick-raise-row">
+                        <button type="button" class="btn poker-quick-raise-btn" data-raise-shortcut="2x">2x</button>
+                        <button type="button" class="btn poker-quick-raise-btn" data-raise-shortcut="3x">3x</button>
+                        <button type="button" class="btn poker-quick-raise-btn poker-quick-raise-btn-allin" data-raise-shortcut="allin">All-in</button>
+                    </div>
+
+                    <div class="poker-raise-box">
+                        <label class="poker-raise-label" for="poker-raise-slider">Размер повышения</label>
+                        <input type="range" id="poker-raise-slider" min="20" max="200" value="40" step="10">
+                        <div class="poker-raise-readout" id="poker-raise-readout">Повысить до 40</div>
+                    </div>
+                </div>
+
+                <div class="poker-log-wrap">
+                    <div class="poker-log-title">Лог раздачи</div>
+                    <div class="poker-log" id="poker-log"></div>
+                </div>
+            </div>
+        </section>
+
         <section id="gallery-section">
             <h2>&ensp;Галерея</h2>
             <div class="gallery-grid" id="gallery-container"></div>
@@ -140,14 +255,14 @@
                 <div class="balance-status-row">
                     <div class="balance-timer" id="balance-timer">30.0s</div>
                     <div id="balance-attempts-ui" style="font-family: monospace; font-size: 14px; color: var(--text-muted);">Попытка: <span id="balance-attempts-count">0</span></div>
-                    <div id="balance-fail-display" class="balance-fail-timer" style="display:none; color:#ef4444; font-weight:bold; font-size:24px;">⚠ <span>0.4</span>s</div>
+                    <div id="balance-fail-display" class="balance-fail-timer" style="display:none; color:#ef4444; font-weight:bold; font-size:24px;"><span class="inline-icon balance-fail-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4 3.5 19h17L12 4Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M12 9v4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1.2" fill="currentColor" stroke="none"/></svg></span> <span class="balance-fail-value">0.4</span>s</div>
                 </div>
                 <div class="balance-bar-container" id="balance-area" style="cursor:none; height:60px; background:#151715; border:2px solid #3b4039; border-radius:30px; position:relative; overflow:hidden; margin:20px 0;">
                     <div id="balance-zone" class="balance-green-zone" style="position:absolute; height:100%; background:rgba(107,140,108,0.6); border-left:3px solid #6b8c6c; border-right:3px solid #6b8c6c; width:20%;"></div>
                     <div id="balance-pen" class="balance-pen" style="position:absolute; top:50%; transform:translate(-50%, -50%); font-size:32px; z-index:10; pointer-events:none;">🖊️</div>
                 </div>
                 <div id="balance-instr" class="balance-instructions">Наведи ручку на зелёную зону!</div>
-                <button id="balance-restart-btn" class="btn" style="display:none; margin: 15px auto; background:#dcb97a; color:#1c1e1c;">🔄 ПОПРОБОВАТЬ ЕЩЁ РАЗ</button>
+                <button id="balance-restart-btn" class="btn" style="display:none; margin: 15px auto; background:#dcb97a; color:#1c1e1c;">ПОПРОБОВАТЬ ЕЩЁ РАЗ</button>
             </div>
             <span class="modal-close" id="balance-close">&times;</span>
         </div>
@@ -160,7 +275,7 @@
                 <span class="terminal-dot yellow"></span>
                 <span class="terminal-dot green"></span>
                 <span class="terminal-title">LONA_OS // ACCESS_LAYER</span>
-                <span id="terminal-close" style="margin-left: auto; cursor: pointer; color: #6b8c6c; font-size: 20px;">&times;</span>
+                <span id="terminal-close" aria-label="Закрыть терминал">&times;</span>
             </div>
             <div class="terminal-body">
                 <div id="terminal-input-wrap">
@@ -186,10 +301,24 @@
                     <p style="font-size: 12px; color: #6b8c6c; margin-bottom: 20px;">(Кликни на код, чтобы скопировать его)</p>
                     <p class="t-msg">Отправь этот код Брунику в ЛС:</p>
                     <p class="t-msg">И приложи скриншот сайта: чтобы были видны выполненные задания плана Бруника.</p>
-                    <p id="terminal-meta" style="font-size: 12px; margin: 8px 0 12px;">🛡️ Проверка целостности ключа активна.</p>
+                    <p id="terminal-meta" style="font-size: 12px; margin: 8px 0 12px;"><span class="inline-icon terminal-meta-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 5 3 8.3 7 10 4-1.7 7-5 7-10V6l-7-3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m9.2 12.1 1.8 1.8 3.8-4.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Проверка целостности ключа активна.</p>
                     <button id="terminal-copy" class="btn download-btn" style="margin-top:10px; cursor: pointer;">
-                        📋 СКОПИРОВАТЬ ТГ: @brun11kbron
+                        <span class="inline-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 4h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M7 8H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span><span class="btn-label">СКОПИРОВАТЬ ТГ: @brun11kbron</span>
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="poker-overlay" class="modal poker-modal">
+        <div class="poker-modal-shell" id="poker-modal-shell">
+            <span class="modal-close poker-close" id="poker-close">&times;</span>
+            <div class="poker-session-finish" id="poker-session-finish" aria-live="polite">
+                <div class="poker-session-finish-card">
+                    <div class="poker-session-finish-kicker" id="poker-session-finish-kicker">Сессия завершена</div>
+                    <h3 class="poker-session-finish-title" id="poker-session-finish-title">Пора начать заново</h3>
+                    <p class="poker-session-finish-copy" id="poker-session-finish-copy">Статистика и ридсы Юи сохранятся. Новая сессия начнётся только после твоего подтверждения.</p>
+                    <button type="button" class="btn download-btn poker-session-finish-btn" id="poker-session-finish-btn">Начать новую сессию</button>
                 </div>
             </div>
         </div>
@@ -197,5 +326,159 @@
 
     <script src="data.js"></script>
     <script src="app.obfuscated.js"></script>
+    <script src="poker-ai.js"></script>
+    <script src="poker.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const PEN_EMOJI = '\uD83D\uDD8A\uFE0F';
+            const BROKEN_BREAK_CLASS = 'broken-break-enter';
+            const isMiniGameBusy = () => {
+                const balanceOverlay = document.getElementById('balance-game-overlay');
+                const pokerOverlay = document.getElementById('poker-overlay');
+                return balanceOverlay?.style.display === 'flex'
+                    || pokerOverlay?.classList.contains('active')
+                    || pokerOverlay?.classList.contains('closing');
+            };
+            const syncBalanceGameState = () => {
+                const balanceOverlay = document.getElementById('balance-game-overlay');
+                document.body.classList.toggle('balance-game-open', balanceOverlay?.style.display === 'flex');
+            };
+            const isFireflyToast = (message) => {
+                const text = String(message || '').toLowerCase();
+                return [
+                    'светляч',
+                    'искр',
+                    'афк',
+                    'псс',
+                    'хокаге светлячков',
+                    'траву потрогать',
+                    'прайме'
+                ].some((pattern) => text.includes(pattern));
+            };
+
+            if (typeof window.showLoFiToast === 'function') {
+                const originalShowLoFiToast = window.showLoFiToast.bind(window);
+                window.showLoFiToast = (message, color) => {
+                    if (isMiniGameBusy() && isFireflyToast(message)) return;
+                    return originalShowLoFiToast(message, color);
+                };
+            }
+
+            syncBalanceGameState();
+
+            const bindPenTriggers = () => {
+                document.querySelectorAll('#bots-container .card').forEach((card) => {
+                    const inkAvatar = card.querySelector('.avatar.bot .inline-icon-ink');
+                    const author = card.querySelector('.post-author');
+                    if (!inkAvatar || !author) return;
+
+                    const existingLabel = author.querySelector('.post-author-label');
+                    const labelText = (existingLabel ? existingLabel.textContent : author.textContent)
+                        .replace(/(?:\u270D|\u{1F58A}|\uFE0F)/gu, '')
+                        .trim();
+
+                    const label = document.createElement('span');
+                    label.className = 'post-author-label';
+                    label.textContent = labelText;
+
+                    const trigger = document.createElement('button');
+                    trigger.type = 'button';
+                    trigger.className = 'post-author-pen-trigger';
+                    trigger.textContent = PEN_EMOJI;
+                    trigger.title = 'Открыть игру с ручкой';
+                    trigger.setAttribute('aria-label', 'Открыть игру с ручкой');
+                    trigger.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        if (window.openBalanceGame) window.openBalanceGame();
+                    });
+
+                    author.replaceChildren(label, trigger);
+                });
+            };
+
+            bindPenTriggers();
+
+            const botsContainer = document.getElementById('bots-container');
+            if (botsContainer && 'MutationObserver' in window) {
+                const observer = new MutationObserver(() => bindPenTriggers());
+                observer.observe(botsContainer, { childList: true, subtree: true });
+            }
+
+            const balanceOverlay = document.getElementById('balance-game-overlay');
+            if (balanceOverlay && 'MutationObserver' in window) {
+                const balanceObserver = new MutationObserver(() => syncBalanceGameState());
+                balanceObserver.observe(balanceOverlay, {
+                    attributes: true,
+                    attributeFilter: ['style', 'class']
+                });
+            }
+
+            const triggerBrokenEntry = (card) => {
+                if (!card?.classList.contains('broken-extension')) return;
+                card.classList.remove(BROKEN_BREAK_CLASS);
+                requestAnimationFrame(() => {
+                    card.classList.add(BROKEN_BREAK_CLASS);
+                    window.setTimeout(() => {
+                        if (card.classList.contains('broken-extension')) {
+                            card.classList.remove(BROKEN_BREAK_CLASS);
+                        }
+                    }, 520);
+                });
+            };
+
+            const extensionsContainer = document.getElementById('extensions-container');
+            if (extensionsContainer && 'MutationObserver' in window) {
+                const brokenCards = new WeakSet();
+                extensionsContainer.querySelectorAll('.card.broken-extension').forEach((card) => {
+                    brokenCards.add(card);
+                });
+                const extensionsObserver = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.type === 'childList') {
+                            mutation.addedNodes.forEach((node) => {
+                                if (!(node instanceof Element)) return;
+                                const cards = node.matches?.('.card')
+                                    ? [node]
+                                    : Array.from(node.querySelectorAll?.('.card') || []);
+                                cards.forEach((card) => {
+                                    if (card.classList.contains('broken-extension') && !brokenCards.has(card)) {
+                                        brokenCards.add(card);
+                                        triggerBrokenEntry(card);
+                                    }
+                                });
+                            });
+                            return;
+                        }
+
+                        if (!(mutation.target instanceof Element)) return;
+                        const card = mutation.target.closest('.card');
+                        if (!card) return;
+
+                        const isBroken = card.classList.contains('broken-extension');
+                        const wasBroken = brokenCards.has(card);
+
+                        if (isBroken && !wasBroken) {
+                            brokenCards.add(card);
+                            triggerBrokenEntry(card);
+                            return;
+                        }
+
+                        if (!isBroken && wasBroken) {
+                            brokenCards.delete(card);
+                            card.classList.remove(BROKEN_BREAK_CLASS);
+                        }
+                    });
+                });
+
+                extensionsObserver.observe(extensionsContainer, {
+                    subtree: true,
+                    childList: true,
+                    attributes: true,
+                    attributeFilter: ['class']
+                });
+            }
+        });
+    </script>
 </body>
 </html>
