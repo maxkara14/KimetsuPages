@@ -2855,7 +2855,10 @@ body.poker-open .poker-launch-btn {
 }
 
 .poker-log {
-    display: grid;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    align-content: flex-start;
     gap: 7px;
     max-height: 180px;
     overflow-y: auto;
@@ -3853,6 +3856,128 @@ body.poker-open .poker-launch-btn {
         width: 100%;
         min-width: 0;
         box-sizing: border-box;
+    }
+}
+
+@media (min-width: 561px) and (max-width: 700px) {
+    :root {
+        --wide-mobile-btn-width: min(156px, calc((100vw - 56px) / 2));
+        --wide-mobile-btn-height: 42px;
+        --wide-mobile-btn-gap: 8px;
+    }
+
+    #canvas-btn-group {
+        left: 50% !important;
+        right: auto !important;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 16px) !important;
+        width: calc(var(--wide-mobile-btn-width) * 2 + var(--wide-mobile-btn-gap));
+        max-width: calc(var(--wide-mobile-btn-width) * 2 + var(--wide-mobile-btn-gap)) !important;
+        transform: translateX(-50%);
+        display: grid;
+        grid-template-columns: repeat(2, var(--wide-mobile-btn-width));
+        grid-auto-rows: var(--wide-mobile-btn-height);
+        gap: var(--wide-mobile-btn-gap) !important;
+        flex-wrap: unset;
+        justify-content: center;
+        align-items: stretch;
+    }
+
+    .poker-launch-btn {
+        left: calc(50% - var(--wide-mobile-btn-width) - (var(--wide-mobile-btn-gap) / 2)) !important;
+        right: auto !important;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 16px + var(--wide-mobile-btn-height) + var(--wide-mobile-btn-gap)) !important;
+        width: var(--wide-mobile-btn-width) !important;
+        max-width: var(--wide-mobile-btn-width) !important;
+        min-width: 0 !important;
+        min-height: var(--wide-mobile-btn-height);
+        padding: 9px 12px !important;
+        font-size: 11px !important;
+        z-index: 29400 !important;
+    }
+
+    .l-top-section {
+        flex-direction: row;
+        align-items: stretch;
+    }
+
+    .l-speech-bubble {
+        width: auto;
+        flex: 1 1 0;
+    }
+
+    .l-player {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .l-track-info {
+        width: auto;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .l-now-playing-row {
+        flex-direction: row;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+        width: 100%;
+    }
+
+    .l-now-playing,
+    .l-freq {
+        white-space: nowrap;
+    }
+
+    .l-freq {
+        text-align: right;
+        flex-shrink: 0;
+    }
+
+    .l-audio-container {
+        width: auto;
+        max-width: none;
+    }
+
+    .custom-lofi-player {
+        justify-content: flex-start;
+    }
+
+    .c-vol-wrap {
+        width: auto;
+        flex: 1 1 auto;
+    }
+
+    .l-eq-box {
+        width: auto;
+        align-self: auto;
+        flex: 0 0 auto;
+    }
+
+    #canvas-btn-group .btn {
+        width: var(--wide-mobile-btn-width);
+        min-width: 0;
+        min-height: var(--wide-mobile-btn-height);
+        height: var(--wide-mobile-btn-height);
+        padding: 9px 12px !important;
+        font-size: 11px !important;
+        flex: none;
+        box-sizing: border-box;
+    }
+
+    #canvas-btn-group .terminal-shortcut-btn {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    #canvas-btn-group .btn:not(.terminal-shortcut-btn):not(.btn-danger) {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    #canvas-btn-group .btn-danger {
+        grid-column: 2;
+        grid-row: 2;
     }
 }
 
