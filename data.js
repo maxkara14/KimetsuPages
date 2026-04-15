@@ -30,6 +30,12 @@ const siteData = {
             url: "https://github.com/maxkara14/BB-Extension-Sorter",
             btnText: "Установить с GitHub"
         },
+		{
+            title: "🖼️ BB Floating Avatar Viewer",
+            description: "Удобное расширение для SillyTavern, которое позволяет открывать аватарки персонажей и персоны в отдельном плавающем окне, свободно перемещать их по экрану и менять размер так, как удобно именно вам. Поддерживает мобильные жесты, помогает рассматривать изображения без лишней суеты и делает работу с аватарками заметно комфортнее и приятнее.",
+            url: "https://github.com/maxkara14/BB-Floating-Avatar-Viewer",
+            btnText: "Установить с GitHub"
+        },
         {
             title: "✨ BB Enhance Generation",
             description: "Интерактивная панель инструментов с красивым HUD-интерфейсом. Включает редактуру текста (Enhance/Improve), генерацию неожиданных событий, броски 3D-кубика (Action Roll), быстрое перемещение (Fast Travel) и промотку времени (Time Skip). Поддерживает кастомный API.",
