@@ -371,20 +371,54 @@
             };
         }
 
+        function createStreetReadBlock() {
+            return {
+                preflop: 0,
+                flop: 0,
+                turn: 0,
+                river: 0
+            };
+        }
+
+        function createHumanReadsState() {
+            return {
+                facedAggression: 0,
+                foldedToAggression: 0,
+                postflopAggression: 0,
+                riverAggression: 0,
+                showdowns: 0,
+                showdownWeak: 0,
+                showdownStrong: 0,
+                bluffsShown: 0,
+                facedByStreet: createStreetReadBlock(),
+                foldedByStreet: createStreetReadBlock(),
+                calledByStreet: createStreetReadBlock(),
+                raisedByStreet: createStreetReadBlock(),
+                checkedToByStreet: createStreetReadBlock(),
+                probesByStreet: createStreetReadBlock(),
+                checksBackByStreet: createStreetReadBlock(),
+                aggressiveShowdownStrong: 0,
+                aggressiveShowdownWeak: 0,
+                recentPatterns: []
+            };
+        }
+
         function createReadsState() {
             return {
-                human: {
-                    facedAggression: 0,
-                    foldedToAggression: 0,
-                    postflopAggression: 0,
-                    riverAggression: 0,
-                    showdowns: 0,
-                    showdownWeak: 0,
-                    showdownStrong: 0,
-                    bluffsShown: 0
-                },
+                human: createHumanReadsState(),
                 recentActions: []
             };
+        }
+
+        function bumpStreetRead(map, street) {
+            if (!map || !Object.prototype.hasOwnProperty.call(map, street)) return;
+            map[street] = (Number(map[street]) || 0) + 1;
+        }
+
+        function pushHumanPattern(tag) {
+            if (!tag || !state.reads?.human) return;
+            state.reads.human.recentPatterns.push(tag);
+            state.reads.human.recentPatterns = state.reads.human.recentPatterns.slice(-16);
         }
 
         function randomItem(items) {
@@ -394,6 +428,12 @@
         function setYuiLine(bucket, fallback) {
             if (!ui.yuiLine) return;
             const text = YUI_LINES[bucket]?.length ? randomItem(YUI_LINES[bucket]) : fallback;
+            ui.yuiLine.textContent = text || '';
+            saveState();
+        }
+
+        function setYuiText(text) {
+            if (!ui.yuiLine) return;
             ui.yuiLine.textContent = text || '';
             saveState();
         }
@@ -522,10 +562,45 @@
                     human: { ...createStatsBlock(), ...(snapshot.stats?.human || {}) },
                     ai: { ...createStatsBlock(), ...(snapshot.stats?.ai || {}) }
                 };
+                const defaultReads = createReadsState();
                 state.reads = {
-                    ...createReadsState(),
+                    ...defaultReads,
                     ...(snapshot.reads || {}),
-                    human: { ...createReadsState().human, ...(snapshot.reads?.human || {}) },
+                    human: {
+                        ...defaultReads.human,
+                        ...(snapshot.reads?.human || {}),
+                        facedByStreet: {
+                            ...defaultReads.human.facedByStreet,
+                            ...(snapshot.reads?.human?.facedByStreet || {})
+                        },
+                        foldedByStreet: {
+                            ...defaultReads.human.foldedByStreet,
+                            ...(snapshot.reads?.human?.foldedByStreet || {})
+                        },
+                        calledByStreet: {
+                            ...defaultReads.human.calledByStreet,
+                            ...(snapshot.reads?.human?.calledByStreet || {})
+                        },
+                        raisedByStreet: {
+                            ...defaultReads.human.raisedByStreet,
+                            ...(snapshot.reads?.human?.raisedByStreet || {})
+                        },
+                        checkedToByStreet: {
+                            ...defaultReads.human.checkedToByStreet,
+                            ...(snapshot.reads?.human?.checkedToByStreet || {})
+                        },
+                        probesByStreet: {
+                            ...defaultReads.human.probesByStreet,
+                            ...(snapshot.reads?.human?.probesByStreet || {})
+                        },
+                        checksBackByStreet: {
+                            ...defaultReads.human.checksBackByStreet,
+                            ...(snapshot.reads?.human?.checksBackByStreet || {})
+                        },
+                        recentPatterns: Array.isArray(snapshot.reads?.human?.recentPatterns)
+                            ? snapshot.reads.human.recentPatterns.slice(-16)
+                            : []
+                    },
                     recentActions: Array.isArray(snapshot.reads?.recentActions) ? snapshot.reads.recentActions.slice(0, 60) : []
                 };
                 state.handTrace = Array.isArray(snapshot.handTrace) ? snapshot.handTrace.slice(0, 48) : [];
@@ -1220,6 +1295,7 @@
         }
 
         function recordActionEvent(id, type, details = {}) {
+            const priorStreetActions = state.handTrace.filter((item) => item.street === state.street);
             const entry = {
                 handNumber: state.handNumber,
                 street: state.street,
@@ -1238,12 +1314,30 @@
 
             if (id !== 'human') return;
 
+            const effectiveType = type === 'call' && entry.toCall === 0 ? 'check' : type;
+            const checkedToSpot = priorStreetActions.length === 1
+                && priorStreetActions[0].actor === 'ai'
+                && priorStreetActions[0].type === 'check';
+
             if (entry.toCall > 0) {
                 state.reads.human.facedAggression += 1;
+                bumpStreetRead(state.reads.human.facedByStreet, entry.street);
             }
 
             if (type === 'fold' && entry.toCall > 0) {
                 state.reads.human.foldedToAggression += 1;
+                bumpStreetRead(state.reads.human.foldedByStreet, entry.street);
+                pushHumanPattern(`fold:${entry.street}`);
+            }
+
+            if (type === 'call' && entry.toCall > 0) {
+                bumpStreetRead(state.reads.human.calledByStreet, entry.street);
+                pushHumanPattern(`stick:${entry.street}`);
+            }
+
+            if (type === 'raise' && entry.toCall > 0) {
+                bumpStreetRead(state.reads.human.raisedByStreet, entry.street);
+                pushHumanPattern(`fight:${entry.street}`);
             }
 
             if (type === 'raise' && state.street !== 'preflop') {
@@ -1252,6 +1346,20 @@
 
             if (type === 'raise' && state.street === 'river') {
                 state.reads.human.riverAggression += 1;
+            }
+
+            if (checkedToSpot) {
+                bumpStreetRead(state.reads.human.checkedToByStreet, entry.street);
+
+                if (type === 'raise') {
+                    bumpStreetRead(state.reads.human.probesByStreet, entry.street);
+                    pushHumanPattern(`probe:${entry.street}`);
+                }
+
+                if (effectiveType === 'check') {
+                    bumpStreetRead(state.reads.human.checksBackByStreet, entry.street);
+                    pushHumanPattern(`checkback:${entry.street}`);
+                }
             }
         }
 
@@ -1266,7 +1374,15 @@
 
             if (weakShowdown) state.reads.human.showdownWeak += 1;
             if (strongShowdown) state.reads.human.showdownStrong += 1;
-            if (aggressiveHumanLine && weakShowdown) state.reads.human.bluffsShown += 1;
+            if (aggressiveHumanLine && strongShowdown) {
+                state.reads.human.aggressiveShowdownStrong += 1;
+                pushHumanPattern('value-shown');
+            }
+            if (aggressiveHumanLine && weakShowdown) {
+                state.reads.human.bluffsShown += 1;
+                state.reads.human.aggressiveShowdownWeak += 1;
+                pushHumanPattern('bluff-shown');
+            }
         }
 
         function applyAction(id, action, amount = null) {
@@ -1454,7 +1570,12 @@
         }
 
         function chooseAiAction() {
-            return chooseAiActionLegacy();
+            const decide = window.BBPokerAI?.decide;
+            if (typeof decide !== 'function') {
+                return chooseAiActionLegacy();
+            }
+
+            return decide(buildAiDecisionContext());
         }
 
         function resolveAiTurn() {
@@ -1480,9 +1601,22 @@
             }
 
             state.aiThinking = false;
+            const reasoningLine = typeof decision.reasoning?.speech === 'string' ? decision.reasoning.speech : '';
+            const nextPlan = decision.plan && typeof decision.plan === 'object'
+                ? JSON.parse(JSON.stringify(decision.plan))
+                : null;
 
             try {
                 applyAction('ai', decision.type, decision.amount);
+                if (nextPlan) {
+                    state.handPlan = nextPlan;
+                    if (!reasoningLine) {
+                        saveState();
+                    }
+                }
+                if (!state.handOver && reasoningLine) {
+                    setYuiText(reasoningLine);
+                }
             } catch {
                 const fallbackAction = getToCall('ai') > 0 ? 'call' : 'check';
                 applyAction('ai', fallbackAction);
