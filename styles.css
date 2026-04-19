@@ -1,5 +1,8 @@
 /* === LO-FI ЭСТЕТИКА (Стиль Лоны Фишер) === */
 :root {
+    --floating-action-width: 198px;
+    --floating-action-height: 54px;
+    --floating-action-gap: 10px;
     --bg-dark: #1c1e1c; /* Мягкий тёмно-зелёно-серый фон */
     --card-bg: rgba(35, 38, 35, 0.85); /* Кофейно-древесный оттенок */
     --text-main: #e8e4cf; /* Тёплый кремовый текст (как старая бумага) */
@@ -2205,8 +2208,10 @@ body.poker-open {
     right: clamp(16px, 2.8vw, 28px);
     bottom: clamp(18px, 3.2vw, 30px);
     z-index: 29400;
-    width: auto;
-    min-width: 198px;
+    width: var(--floating-action-width);
+    min-width: var(--floating-action-width);
+    max-width: var(--floating-action-width);
+    min-height: var(--floating-action-height);
     justify-content: center;
     gap: 10px;
     padding: 14px 18px;
@@ -2219,6 +2224,8 @@ body.poker-open {
         inset 0 0 0 1px rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(8px);
     transition: opacity 0.22s ease, transform 0.22s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+    white-space: nowrap;
 }
 
 body.balance-game-open .poker-launch-btn,
@@ -4612,10 +4619,20 @@ body.poker-open .poker-launch-btn {
 }
 
 @media (min-width: 701px) {
+    #canvas-btn-group .btn {
+        width: var(--floating-action-width);
+        min-width: var(--floating-action-width);
+        min-height: var(--floating-action-height);
+        height: var(--floating-action-height);
+        padding: 12px 16px;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+
     #canvas-btn-group:has(.terminal-shortcut-btn) {
-        --desktop-action-width: 198px;
-        --desktop-action-gap: 10px;
-        --desktop-action-height: 54px;
+        --desktop-action-width: var(--floating-action-width);
+        --desktop-action-gap: var(--floating-action-gap);
+        --desktop-action-height: var(--floating-action-height);
         left: 16px;
         right: auto;
         bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
@@ -4630,11 +4647,11 @@ body.poker-open .poker-launch-btn {
     .poker-launch-btn {
         left: 16px;
         right: auto;
-        bottom: calc(env(safe-area-inset-bottom, 0px) + 16px + var(--desktop-action-height, 54px) + var(--desktop-action-gap, 10px));
-        width: var(--desktop-action-width, 198px);
-        min-width: var(--desktop-action-width, 198px);
-        max-width: var(--desktop-action-width, 198px);
-        min-height: var(--desktop-action-height, 54px);
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 16px + var(--desktop-action-height, var(--floating-action-height)) + var(--desktop-action-gap, var(--floating-action-gap)));
+        width: var(--desktop-action-width, var(--floating-action-width));
+        min-width: var(--desktop-action-width, var(--floating-action-width));
+        max-width: var(--desktop-action-width, var(--floating-action-width));
+        min-height: var(--desktop-action-height, var(--floating-action-height));
         padding: 12px 16px;
         box-sizing: border-box;
     }
@@ -4643,17 +4660,17 @@ body.poker-open .poker-launch-btn {
         right: 16px;
         left: auto;
         bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
-        width: var(--desktop-action-width, 198px);
-        min-width: var(--desktop-action-width, 198px);
-        max-width: var(--desktop-action-width, 198px);
+        width: var(--desktop-action-width, var(--floating-action-width));
+        min-width: var(--desktop-action-width, var(--floating-action-width));
+        max-width: var(--desktop-action-width, var(--floating-action-width));
         box-sizing: border-box;
     }
 
     #canvas-btn-group:has(.terminal-shortcut-btn) .btn {
-        width: var(--desktop-action-width, 198px);
-        min-width: var(--desktop-action-width, 198px);
-        min-height: var(--desktop-action-height, 54px);
-        height: var(--desktop-action-height, 54px);
+        width: var(--desktop-action-width, var(--floating-action-width));
+        min-width: var(--desktop-action-width, var(--floating-action-width));
+        min-height: var(--desktop-action-height, var(--floating-action-height));
+        height: var(--desktop-action-height, var(--floating-action-height));
         padding: 12px 16px;
         justify-content: center;
         margin-top: 0;
