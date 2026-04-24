@@ -55,19 +55,19 @@ const siteData = {
             title: "Kimetsu Academy 🖊️",
             description: "Альтернативная вселенная Kimetsu no Yaiba в жанре школьной комедии и повседневности. Хашира стали строгими учителями, а истребители — обычными школьниками. Содержит огромное количество канонных персонажей и проработанных авторских OC для ваших сюжетов.",
             icon: "ink",
-            botFile: "files/bots/Kimetsu Academy.json"
+            botFile: "files/bots/Kimetsu Academy.png"
         },
         {
             title: "Kimetsu Tokyo",
             description: "Альтернативная вселенная Kimetsu no Yaiba в жанре городской повседневности, романтики и драмы. Шумный Токио стал полем битвы амбиций: светлая Академия Кимэцу противостоит холодной элитарной школе Кибуцудзи, а магия уступила место талантам и интригам. Включает богатую сеть канонных персонажей и проработанных авторских OC для историй в ритме мегаполиса.",
             icon: "heart",
-            botFile: "files/bots/Kimetsu Tokyo.json"
+            botFile: "files/bots/Kimetsu Tokyo.png"
         },
         {
             title: "Хроники Сильвера",
             description: "Оригинальный сеттинг, объединяющий эстетику традиционной Японии и уникальную систему научно-биохимической магии. Добро пожаловать в Сильвер — скрытое молодое государство, где за изяществом старинной архитектуры и строгой дисциплиной кроются политическое напряжение и смертельная опасность. Содержит глубокий лор и колоритных авторских OC для серьезных, напряженных и драматичных сюжетов.",
             icon: "spark",
-            botFile: "files/bots/Хроники Сильвера.json"
+            botFile: "files/bots/Хроники Сильвера.png"
         }
 
     ],
@@ -97,5 +97,12 @@ const siteData = {
         { src: "img/gallery/Токо.png", title: "Токо" },
         { src: "img/gallery/Мио.png", title: "Мио" },
         { src: "img/gallery/Эрика.png", title: "Эрика" },
+        { src: "img/gallery/Нокита.png", title: "Нокита" },
+        { src: "img/gallery/Рия.png", title: "Рия" },
+        { src: "img/gallery/Фуюми.png", title: "Фуюми" },
+        { src: "img/gallery/Яно.png", title: "Яно" },
+        { src: "img/gallery/Кира.png", title: "Кира" },
+        { src: "img/gallery/Каро.png", title: "Каро" },
+        { src: "img/gallery/Айка.png", title: "Айка" },
     ]
 };
