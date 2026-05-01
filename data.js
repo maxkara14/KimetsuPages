@@ -37,13 +37,6 @@ const siteData = {
             btnText: "Установить с GitHub"
         },
         {
-            title: "🖼️ BB Floating Avatar Viewer",
-            description: "Плавающий просмотр аватаров персонажей и персоны: несколько окон, перетаскивание, масштабирование колесом, pinch-to-zoom, мобильные жесты и запоминание размера и позиции.",
-            icon: "palette",
-            url: "https://github.com/maxkara14/BB-Floating-Avatar-Viewer",
-            btnText: "Установить с GitHub"
-        },
-        {
             title: "✨ BB Enhance Generation",
             description: "Панель инструментов над вводом: Enhance, Improve, Event Director, Action Roll, Fast Travel и Time Skip. Кнопки можно включать отдельно, а генерацию ускорять через Custom API.",
             url: "https://github.com/maxkara14/BB-Enhance-Gen",
