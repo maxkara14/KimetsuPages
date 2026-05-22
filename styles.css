@@ -3904,6 +3904,10 @@ body:has(#gallery-modal.closing) .poker-launch-btn {
         z-index: 2600 !important;
     }
 
+    body:has(#canvas-btn-group .terminal-shortcut-btn) .poker-launch-btn {
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 16px + var(--wide-mobile-btn-height) + var(--wide-mobile-btn-height) + var(--wide-mobile-btn-gap) + var(--wide-mobile-btn-gap)) !important;
+    }
+
     .l-top-section {
         flex-direction: row;
         align-items: stretch;
@@ -4656,6 +4660,10 @@ body:has(#gallery-modal.closing) .poker-launch-btn {
         min-height: var(--desktop-action-height, var(--floating-action-height));
         padding: 12px 16px;
         box-sizing: border-box;
+    }
+
+    body:has(#canvas-btn-group .terminal-shortcut-btn) .poker-launch-btn {
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 16px + var(--desktop-action-height, var(--floating-action-height)) + var(--desktop-action-height, var(--floating-action-height)) + var(--desktop-action-gap, var(--floating-action-gap)) + var(--desktop-action-gap, var(--floating-action-gap)));
     }
 
     #firefly-score-board {
